@@ -1,9 +1,5 @@
 keyframe_*.jpg
-raw/*
-!raw/.gitkeep
 !raw/test_footage/
 raw/test_footage/*
 !raw/test_footage/*.mp4
 !raw/test_footage/sources.md
-processed/*
-!processed/.gitkeep
