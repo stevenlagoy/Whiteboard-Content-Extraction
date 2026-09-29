@@ -1,0 +1,14 @@
+numpy
+torch
+torchvision
+opencv-python
+pillow
+scikit-learn
+matplotlib
+pandas
+pytest
+ruff
+flask
+python-docx
+reportlab
+pytesseract

@@ -216,3 +216,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Flask instance data
+instance/
+
+# Document outputs
+*.docx
+*.pdf
+!docs/*.docx
+!docs/*.pdf

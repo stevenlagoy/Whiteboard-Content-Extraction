@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "whiteboard-extraction"
+version = "0.1.0"
+description = "Whiteboard Content Extraction"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Steven LaGoy", email = "lagosm01@pfw.edu" },
+    { name = "Dalton Lybarger", email = "lybads01@pfw.edu" },
+    { name = "Pranav Rao", email = "raops01@pfw.edu" },
+]
+dependencies = [
+    "numpy",
+    "torch",
+    "torchvision",
+    "opencv-python",
+    "pillow",
+    "scikit-learn",
+    "matplotlib",
+    "pandas",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
