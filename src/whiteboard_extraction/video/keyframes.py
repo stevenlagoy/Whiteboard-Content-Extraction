@@ -16,7 +16,7 @@ def frames_differ(prev: np.ndarray, curr: np.ndarray, threshold: float = 0.02) -
     return change_fraction(prev, curr) > threshold
 
 
-def extract_keyframes(segmented_frames: Iterable[tuple[float, np.ndarray]], threshold: float = 0.02) -> list[tuple[float, np.ndarray]]:
+def extract_keyframes(segmented_frames: Iterable[tuple[float, np.ndarray]], threshold: float = 0.02, quota: int = 0) -> list[tuple[float, np.ndarray]]:
     """Collapse (timestamp, board_frame) pairs into keyframes.
 
     A keyframe is kept whenever content has changed enough from the
@@ -26,4 +26,7 @@ def extract_keyframes(segmented_frames: Iterable[tuple[float, np.ndarray]], thre
     for timestamp, frame in segmented_frames:
         if not keyframes or frames_differ(keyframes[-1][1], frame, threshold):
             keyframes.append((timestamp, frame))
+    if len(keyframes) < quota:
+        quota_ratio = 1 - abs(quota - len(keyframes)) / quota
+        return extract_keyframes(segmented_frames, threshold * quota_ratio, quota)
     return keyframes

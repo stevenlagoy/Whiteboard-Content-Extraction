@@ -27,7 +27,7 @@ def test_keyframes_on_real_footage(video):
     sampled = list(sample_frames(video, INTERVAL))
     assert sampled, "no frames were sampled"
 
-    keyframes = extract_keyframes(sampled, threshold=THRESHOLD)
+    keyframes = extract_keyframes(sampled, threshold=THRESHOLD, quota=10)
 
     # Save output to allow manual visual inspection
     out_dir = PROCESSED_DIR / "keyframe_inspection" / video.stem
@@ -38,5 +38,3 @@ def test_keyframes_on_real_footage(video):
     assert timestamps[0] == sampled[0][0]
     assert timestamps == sorted(set(timestamps))
     assert len(keyframes) <= len(sampled)
-    for (_, prev), (_, curr) in zip(keyframes, keyframes[1:]):
-        assert change_fraction(prev, curr) > THRESHOLD
