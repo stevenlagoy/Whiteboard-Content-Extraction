@@ -8,7 +8,6 @@ matplotlib
 pandas
 pytest
 ruff
-flask
 python-docx
 reportlab
 pytesseract

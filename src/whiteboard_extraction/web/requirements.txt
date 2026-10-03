@@ -1,0 +1,5 @@
+# Core processing dependencies from repository root
+-r ../../../requirements.txt
+
+# Dependencies unique to the web interface
+flask
