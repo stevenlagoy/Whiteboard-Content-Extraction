@@ -37,8 +37,5 @@ where = ["src"]
 pythonpath = ["src"]
 testpaths = ["tests"]
 
-[tool.setuptools.packages.find]
-where = ["src"]
-
 [tool.setuptools.package-data]
 "whiteboard_extraction.web" = ["templates/*.html", "static/*"]
