@@ -1,15 +1,28 @@
 services:
   - type: web
     name: whiteboard-extraction
+    branch: main
     runtime: python
+    autoDeployTrigger: checksPass
     buildCommand: pip install -r requirements.txt && pip install -e .
     startCommand: waitress-serve --host=0.0.0.0 --port=$PORT --threads=4 --max-request-body-size=5368709120 --call whiteboard_extraction.web.app:create_app
+    healthCheckPath: /healthz
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.4
       - key: UPLOAD_ROOT
         value: /tmp/whiteboard
-      - key: PYTHONUNBUFFERED
-        value: "1"
-      - key: FLASK_SECRET_KEY
-        generateValue: true
+
+  - type: web
+    name: whiteboard-extraction-staging
+    branch: test/render-hosting
+    runtime: python
+    autoDeployTrigger: checksPass
+    buildCommand: pip install -r requirements.txt && pip install -e .
+    startCommand: waitress-serve --host=0.0.0.0 --port=$PORT --threads=4 --max-request-body-size=5368709120 --call whiteboard_extraction.web.app:create_app
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.4
+      - key: UPLOAD_ROOT
+        value: /tmp/whiteboard
