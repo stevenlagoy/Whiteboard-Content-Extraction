@@ -3,7 +3,7 @@ services:
     name: whiteboard-extraction
     runtime: python
     buildCommand: pip install -r requirements.txt && pip install -e .
-    startCommand: gunicorn "whiteboard_extraction.web.app:create_app()" --workers 1 --timeout 300
+    startCommand: waitress-serve --host=0.0.0.0 --port=$PORT --threads=4 --max-request-body-size=5368709120 --call whiteboard_extraction.web.app:create_app
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.4

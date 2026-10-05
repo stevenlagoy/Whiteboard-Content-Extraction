@@ -11,4 +11,4 @@ ruff
 python-docx
 reportlab
 pytesseract
-gunicorn
+waitress
