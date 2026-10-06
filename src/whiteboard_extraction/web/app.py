@@ -15,6 +15,10 @@ def create_app() -> Flask:
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
+    @app.route("/healthz")
+    def healthz():
+        return {"status": "ok"}, 200
+
     @app.route("/", methods=["GET"])
     def index():
         return render_template("upload.html")
