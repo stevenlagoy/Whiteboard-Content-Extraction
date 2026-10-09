@@ -228,6 +228,8 @@ instance/
 
 ## PyTorch
 
+*.pt
+
 .dmypy.json
 .gradle
 .hypothesis
