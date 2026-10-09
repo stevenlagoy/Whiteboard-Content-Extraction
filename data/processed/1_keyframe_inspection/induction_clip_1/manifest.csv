@@ -1,0 +1,13 @@
+index,timestamp_seconds,filename
+0,0.0,keyframe_0000_00-00-00-000.jpg
+1,4.0,keyframe_0001_00-00-04-000.jpg
+2,8.0,keyframe_0002_00-00-08-000.jpg
+3,10.0,keyframe_0003_00-00-10-000.jpg
+4,12.0,keyframe_0004_00-00-12-000.jpg
+5,24.0,keyframe_0005_00-00-24-000.jpg
+6,30.0,keyframe_0006_00-00-30-000.jpg
+7,32.0,keyframe_0007_00-00-32-000.jpg
+8,34.0,keyframe_0008_00-00-34-000.jpg
+9,38.0,keyframe_0009_00-00-38-000.jpg
+10,42.0,keyframe_0010_00-00-42-000.jpg
+11,44.0,keyframe_0011_00-00-44-000.jpg
