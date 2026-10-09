@@ -3,3 +3,18 @@
 
 # Dependencies unique to the web interface
 flask
+matplotlib
+numpy
+opencv-python
+opencv-python-headless
+pandas
+pillow
+pytesseract
+pytest
+python-docx
+reportlab
+ruff
+scikit-learn
+torch
+torchvision
+waitress
