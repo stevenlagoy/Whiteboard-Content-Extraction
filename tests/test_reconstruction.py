@@ -1,3 +1,4 @@
+# from whiteboard_extraction.reconstruction.document import characters_to_expression, expression_to_latex
 # from whiteboard_extraction.reconstruction.document import build_document
 
 # def test_characters_to_expression():
@@ -5,3 +6,5 @@
 
 # def test_expression_to_latex_substitutes_symbols():
 #     assert expression_to_latex("2xtimes5=15") == r"$2x\times5=15$"
+def test_dummy():
+    return None

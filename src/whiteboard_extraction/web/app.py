@@ -1,17 +1,23 @@
 """Flask app"""
 
+import os
 import uuid
 from pathlib import Path
 
 from flask import Flask, render_template, request, send_file
 
-UPLOAD_DIR = Path("instance/uploads")
-OUTPUT_DIR = Path("instance/outputs")
+ROOT = Path(os.environ.get("UPLOAD_ROOT", "instance"))
+UPLOAD_DIR = ROOT / "instance/uploads"
+OUTPUT_DIR = ROOT / "instance/outputs"
 
 def create_app() -> Flask:
     app = Flask(__name__)
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    @app.route("/healthz")
+    def healthz():
+        return {"status": "ok"}, 200
 
     @app.route("/", methods=["GET"])
     def index():
