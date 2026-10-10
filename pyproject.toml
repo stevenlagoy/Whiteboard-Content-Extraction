@@ -33,11 +33,11 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["web"]
+where = ["src"]
 
 [tool.pytest.ini_options]
-pythonpath = ["web"]#src/whiteboard_extraction/web
-testpaths = ["../../../tests"]
+pythonpath = ["src"]
+testpaths = ["tests"]
 markers = [
     "real_video: tests that need real lecture footage (skipped in CI)",
 ]
