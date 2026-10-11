@@ -129,4 +129,4 @@ python scripts/benchmark.py
 
 ## Status
 
-Core pipeline stages (video sampling, segmentation, recognition backends, reconstruction, export, and the Flask shell) are scaffolded but not yet implemented. See `docs/project-proposal.md` for current requirements and the task list leading up to the midterm review.
+Core pipeline stages (video sampling, segmentation, recognition backends, reconstruction, export, and the Flask shell) are scaffolded but not yet implemented. See [`docs/PROJECT-PROPOSAL.md`](docs/PROJECT-PROPOSAL.md). for current requirements and the task list leading up to the midterm review.
