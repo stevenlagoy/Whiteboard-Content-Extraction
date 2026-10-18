@@ -1,0 +1,14 @@
+{% macro breadcrumb(path, current=None) %}
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <ol>
+        <li><a href="{{ url_for('pages.dashboard') }}">My files</a></li>
+        {% for folder in path %}
+        <li>
+            {% if loop.last and not current %}<span aria-current="page">{{ folder.name }}</span>
+            {% else %}<a href="{{ url_for('pages.folder', folder_id=folder.id) }}">{{ folder.name }}</a>{% endif %}
+        </li>
+        {% endfor %}
+        {% if current %}<li><span aria-current="page">{{ current }}</span></li>{% endif %}
+    </ol>
+</nav>
+{% endmacro %}

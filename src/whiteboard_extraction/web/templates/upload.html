@@ -1,12 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload</title>
-</head>
-<body>
-    <h1>Upload</h1>
-    <p>Hello, World!</p>
-</body>
-</html>
+{% extends "base.html" %}
+{% from "components/_breadcrumb.html" import breadcrumb %}
+
+{% block title %}Upload a video{% endblock %}
+
+{% block main %}
+{{ breadcrumb([], 'Upload a video') }}
+<header class="pageHeader"><h1>Upload and process a video</h1></header>
+
+<form class="uploadForm" method="post" action="{{ url_for('actions.create_job') }}" enctype="multipart/form-data" data-upload-form>
+    <p class="formError" role="alert" data-form-error{% if not error %} hidden{% endif %}>{{ error }}</p>
+
+    <fieldset class="step">
+        <legend>1. Choose a video</legend>
+        <div class="field">
+            <label for="video-file">Video file</label>
+            <input id="video-file" type="file" name="video" accept="video/*,.mkv,.avi,.mov" required data-file>
+            <p class="hint">MP4, MOV, MKV, WEBM, or AVI, up to {{ max_upload }}.</p>
+        </div>
+    </fieldset>
+
+    <fieldset class="step">
+        <legend>2. Trim (optional)</legend>
+        <p class="hint">Leave both boxes empty to process the whole video. Times look like 90, 1:30, or 1:02:03.</p>
+        <video class="player" controls preload="metadata" hidden data-preview></video>
+        <p class="hint" role="status" data-preview-note hidden></p>
+        <div class="trimFields">
+            <div class="field">
+                <label for="trim-start">Start</label>
+                <input id="trim-start" name="trim_start" value="{{ form.get('trim_start', '') }}" placeholder="0:00" inputmode="numeric" autocomplete="off" data-trim="start">
+                <button type="button" class="button" hidden data-use-position="start">Use current position</button>
+            </div>
+            <div class="field">
+                <label for="trim-end">End</label>
+                <input id="trim-end" name="trim_end" value="{{ form.get('trim_end', '') }}" placeholder="End of video" inputmode="numeric" autocomplete="off" data-trim="end">
+                <button type="button" class="button" hidden data-use-position="end">Use current position</button>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset class="step">
+        <legend>3. Save to</legend>
+        <div class="field">
+            <label for="video-name">Name</label>
+            <input id="video-name" name="name" value="{{ form.get('name', '') }}" maxlength="120" autocomplete="off" placeholder="Uses the file name" data-name>
+        </div>
+        <div class="field">
+            <label for="video-folder">Folder</label>
+            <select id="video-folder" name="folder_id">
+                {% for choice in folder_choices() %}
+                <option value="{{ choice.id or '' }}"{% if (choice.id or '') == selected_folder %} selected{% endif %}>{{ choice.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </fieldset>
+
+    <fieldset class="step">
+        <legend>4. When to start</legend>
+        <div class="radio">
+            <input type="radio" id="start-now" name="start_mode" value="now"{% if form.get('start_mode', 'now') != 'later' %} checked{% endif %}>
+            <label for="start-now">Start as soon as a worker is free</label>
+        </div>
+        <div class="radio">
+            <input type="radio" id="start-later" name="start_mode" value="later"{% if form.get('start_mode') == 'later' %} checked{% endif %}>
+            <label for="start-later">Schedule for later</label>
+        </div>
+        <div class="field">
+            <label for="start-at">Start at</label>
+            <input id="start-at" type="datetime-local" name="start_at" min="{{ earliest_start }}" value="{{ form.get('start_at', '') }}">
+        </div>
+    </fieldset>
+
+    <div class="uploadProgress" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden data-upload-progress>
+        <span class="progressFill" style="width: 0%"></span>
+    </div>
+    <button type="submit" class="button primary" data-submit>Add to queue</button>
+</form>
+{% endblock %}

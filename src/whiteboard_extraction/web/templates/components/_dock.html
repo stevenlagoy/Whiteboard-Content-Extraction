@@ -1,0 +1,9 @@
+{% from "components/_icons.html" import icon %}
+{% set panel = task_panel() %}
+<div class="dock" data-dock data-tasks-url="{{ url_for('pages.tasks_panel') }}">
+    <details class="tasksPanel" open{% if not panel.tasks %} hidden{% endif %} data-tasks-panel>
+        <summary><span>Tasks</span><span class="count" data-tasks-count>{{ panel.active_count }}</span></summary>
+        <div data-tasks-region>{% include "components/_tasks_list.html" %}</div>
+    </details>
+    <a class="fab" href="{{ url_for('pages.upload') }}" aria-label="Upload a video" title="Upload a video">{{ icon('plus', 28) }}</a>
+</div>
