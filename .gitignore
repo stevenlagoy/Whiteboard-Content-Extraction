@@ -220,6 +220,10 @@ __marimo__/
 # Flask instance data
 instance/
 
+# Evaluation outputs (scripts/evaluate.py)
+data/processed/eval_sample/
+/results/
+
 # Document outputs
 *.docx
 *.pdf
