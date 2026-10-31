@@ -27,12 +27,12 @@
         <div class="trimFields">
             <div class="field">
                 <label for="trim-start">Start</label>
-                <input id="trim-start" name="trim_start" value="{{ form.get('trim_start', '') }}" placeholder="0:00" inputmode="numeric" autocomplete="off" data-trim="start">
+                <input id="trim-start" name="trim_start" value="{{ form.get('trim_start', '') }}" placeholder="0:00" inputmode="text" autocomplete="off" data-trim="start">
                 <button type="button" class="button" hidden data-use-position="start">Use current position</button>
             </div>
             <div class="field">
                 <label for="trim-end">End</label>
-                <input id="trim-end" name="trim_end" value="{{ form.get('trim_end', '') }}" placeholder="End of video" inputmode="numeric" autocomplete="off" data-trim="end">
+                <input id="trim-end" name="trim_end" value="{{ form.get('trim_end', '') }}" placeholder="End of video" inputmode="text" autocomplete="off" data-trim="end">
                 <button type="button" class="button" hidden data-use-position="end">Use current position</button>
             </div>
         </div>

@@ -52,7 +52,7 @@
                     <li class="ocrBlock">
                         <div class="ocrMeta">
                             <label class="visually-hidden" for="ocr-time-{{ loop.index0 }}">Timestamp of block {{ loop.index }}</label>
-                            <input id="ocr-time-{{ loop.index0 }}" name="timestamp" value="{{ block.timestamp|timecode }}" size="8" inputmode="numeric" autocomplete="off">
+                            <input id="ocr-time-{{ loop.index0 }}" name="timestamp" value="{{ block.timestamp|timecode }}" size="8" inputmode="text" autocomplete="off">
                             {% if has_media %}<button type="button" class="iconButton" data-seek="{{ block.timestamp }}" aria-label="Play from {{ block.timestamp|timecode }}" title="Play from here">{{ icon('play', 16) }}</button>{% endif %}
                             <label class="visually-hidden" for="ocr-kind-{{ loop.index0 }}">Type of block {{ loop.index }}</label>
                             <select id="ocr-kind-{{ loop.index0 }}" name="kind">
@@ -69,7 +69,7 @@
                     <li class="ocrBlock ocrBlock--new">
                         <div class="ocrMeta">
                             <label for="ocr-time-{{ new_index }}">New block at</label>
-                            <input id="ocr-time-{{ new_index }}" name="timestamp" value="0:00" size="8" inputmode="numeric" autocomplete="off">
+                            <input id="ocr-time-{{ new_index }}" name="timestamp" value="0:00" size="8" inputmode="text" autocomplete="off">
                             <label class="visually-hidden" for="ocr-kind-{{ new_index }}">Type of new block</label>
                             <select id="ocr-kind-{{ new_index }}" name="kind">
                                 <option value="prose">Prose</option>
