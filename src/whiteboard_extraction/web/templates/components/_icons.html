@@ -1,0 +1,26 @@
+{# Inline icons. Usage: {% from "components/_icons.html" import icon %}{{ icon("folder", 18) }} #}
+{% set stroke = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' %}
+{% set PATHS = {
+  'folder': '<path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  'folder-plus': '<g ' ~ stroke ~ '><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 10v6M9 13h6"/></g>',
+  'plus': '<path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/>',
+  'star': '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" ' ~ stroke ~ '/>',
+  'star-filled': '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+  'chevron': '<path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>',
+  'trash': '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" ' ~ stroke ~ '/>',
+  'clock': '<g ' ~ stroke ~ '><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></g>',
+  'video': '<path d="M4 6h10a2 2 0 0 1 2 2v2.5l5-3v9l-5-3V16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>',
+  'arrow-up': '<path d="M12 5l7 8h-4.5v6h-5v-6H5z"/>',
+  'arrow-down': '<path d="M12 19l-7-8h4.5V5h5v6H19z"/>',
+  'upload': '<path d="M12 16V4M7 9l5-5 5 5M4 16v4h16v-4" ' ~ stroke ~ '/>',
+  'download': '<path d="M12 4v12M7 11l5 5 5-5M4 20h16" ' ~ stroke ~ '/>',
+  'check-circle': '<g ' ~ stroke ~ '><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></g>',
+  'minus-circle': '<g ' ~ stroke ~ '><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></g>',
+  'alert': '<path d="M12 3l10 18H2zM12 10v5M12 18v.01" ' ~ stroke ~ '/>',
+  'spinner': '<g ' ~ stroke ~ '><circle cx="12" cy="12" r="9" opacity="0.25"/><path d="M12 3a9 9 0 0 1 9 9"/></g>',
+  'x': '<path d="M6 6l12 12M18 6L6 18" ' ~ stroke ~ '/>',
+  'play': '<path d="M8 5v14l11-7z"/>',
+} %}
+{% macro icon(name, size=20) -%}
+<svg class="icon icon-{{ name }}" width="{{ size }}" height="{{ size }}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">{{ PATHS[name]|safe }}</svg>
+{%- endmacro %}

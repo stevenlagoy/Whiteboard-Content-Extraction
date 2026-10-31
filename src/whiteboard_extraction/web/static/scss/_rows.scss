@@ -1,0 +1,235 @@
+// Video rows, status badges, and the dashboard status summary
+
+$row-columns: 2.75rem minmax(12rem, 1fr) 7.5rem 5.5rem minmax(7rem, 11rem) 8.5rem var(--actions-width, 2.75rem);
+
+.rowHeader,
+.videoRow {
+    display: grid;
+    grid-template-columns: $row-columns;
+    align-items: center;
+    column-gap: 0.75rem;
+}
+
+.rowHeader--reorderable,
+.videoRows--reorderable {
+    --actions-width: 8rem;
+}
+
+.rowHeader {
+    padding: 0 0.75rem 0.25rem;
+    color: $color-text-muted;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.videoRows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.videoRow {
+    min-height: 3.5rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.1s ease;
+
+    &:nth-child(odd) {
+        background-color: $color-row-odd;
+    }
+
+    &:nth-child(even) {
+        background-color: $color-row-even;
+    }
+
+    &:hover {
+        background-color: $color-row-hover;
+    }
+
+    &.isDragging {
+        opacity: 0.45;
+    }
+
+    &.isDropTarget {
+        box-shadow: inset 0 2px 0 $color-focus;
+    }
+}
+
+.rowName {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+    color: $color-text;
+    text-decoration: none;
+
+    &:hover .rowNameText {
+        text-decoration: underline;
+    }
+}
+
+.thumbnail {
+    flex: none;
+    width: 4.5rem;
+    height: 2.6rem;
+    border-radius: 0.25rem;
+    background-color: $color-border-soft;
+    object-fit: cover;
+}
+
+.rowNameText,
+.ellipsis {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// The four metadata cells take part in the row's grid on wide screens
+.rowMeta {
+    display: contents;
+}
+
+.cell {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+    color: $color-text-muted;
+    font-size: 0.9rem;
+
+    .icon {
+        flex: none;
+    }
+}
+
+.rowActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.125rem;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.1rem 0.6rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    color: $color-text-muted;
+    font-size: 0.8rem;
+    white-space: nowrap;
+
+    &--processing { color: $color-processing; }
+    &--queued,
+    &--scheduled { color: $color-waiting; }
+    &--processed { color: $color-success; }
+    &--failed { color: $color-danger; }
+
+    &--processing .icon {
+        animation: spin 1s linear infinite;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.folderRows {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.9rem;
+        border: 1px solid $color-border;
+        border-radius: 0.5rem;
+        color: $color-text;
+        text-decoration: none;
+
+        &:hover {
+            background-color: $color-row-hover;
+        }
+
+        .icon {
+            color: $color-folder;
+        }
+    }
+}
+
+.statusSummary h2 {
+    margin: 1rem 0 0.25rem;
+}
+
+.statusHeadline {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.statTiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 0.75rem;
+    margin: 0.75rem 0;
+    padding: 0;
+    list-style: none;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    padding: 0.9rem 1rem;
+    border: 1px solid $color-border-soft;
+    border-radius: 0.75rem;
+    background-color: $gray-010;
+
+    .statLabel {
+        color: $color-text-muted;
+        font-size: 0.9rem;
+    }
+
+    &--processing .statValue { color: $color-processing; }
+    &--failed .statValue { color: $color-danger; }
+    &--failed.is-zero .statValue { color: $color-text; }
+}
+
+.engineNote {
+    margin: 0;
+    color: $color-text-muted;
+    font-size: 0.85rem;
+}
+
+// Narrow screens: name and actions on the first line, metadata below
+@media (max-width: 64em) {
+    .rowHeader {
+        display: none;
+    }
+
+    .videoRow {
+        grid-template-areas:
+            "star name actions"
+            ". meta meta";
+        grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+        row-gap: 0.25rem;
+    }
+
+    .rowStar { grid-area: star; }
+    .rowName { grid-area: name; }
+    .rowActions { grid-area: actions; }
+
+    .rowMeta {
+        display: flex;
+        flex-wrap: wrap;
+        grid-area: meta;
+        gap: 0.25rem 1rem;
+    }
+}

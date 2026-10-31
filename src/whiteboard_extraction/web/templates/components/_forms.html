@@ -1,0 +1,4 @@
+{# Hidden field that sends the user back to the page they were on. #}
+{% macro next_field(target=None) -%}
+<input type="hidden" name="next" value="{{ target or current_url() }}">
+{%- endmacro %}

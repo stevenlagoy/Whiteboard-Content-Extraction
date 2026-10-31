@@ -1,0 +1,255 @@
+// Buttons, form controls, popovers, the task panel, and progress bars
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid $gray-040;
+    border-radius: 0.5rem;
+    background-color: $color-panel;
+    color: $color-text;
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    list-style: none;
+
+    &:hover {
+        background-color: $color-border-soft;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    &.primary {
+        border-color: $brand-cyan-50;
+        background-color: $color-accent;
+    }
+
+    &.primary:hover {
+        background-color: $brand-cyan-25;
+        filter: brightness(1.2);
+    }
+
+    &.danger {
+        border-color: $brand-red-25;
+        color: $color-danger;
+    }
+}
+
+.iconButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0.5rem;
+    background: none;
+    color: $color-text-muted;
+    cursor: pointer;
+    list-style: none;
+
+    &:hover {
+        background-color: $color-border-soft;
+        color: $color-text;
+    }
+
+    &:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+    }
+
+    &.danger:hover {
+        color: $color-danger;
+    }
+
+    &[aria-pressed="true"] {
+        color: $color-folder;
+    }
+}
+
+summary::-webkit-details-marker {
+    display: none;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: $color-text-muted;
+    font-size: 0.9rem;
+}
+
+input,
+select,
+textarea {
+    max-width: 100%;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid $gray-040;
+    border-radius: 0.375rem;
+    background-color: $gray-005;
+    color: $color-text;
+    font: inherit;
+}
+
+input[type="text"],
+input:not([type]),
+input[type="datetime-local"],
+select {
+    min-height: 2.5rem;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    min-height: 0;
+    accent-color: $brand-cyan-50;
+}
+
+.checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+}
+
+.popover {
+    position: relative;
+
+    >summary {
+        cursor: pointer;
+        list-style: none;
+    }
+
+    .popoverBody {
+        position: absolute;
+        top: calc(100% + 0.25rem);
+        right: 0;
+        z-index: 30;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 17rem;
+        padding: 0.75rem;
+        border: 1px solid $gray-040;
+        border-radius: 0.5rem;
+        background-color: $color-panel;
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.6);
+    }
+}
+
+.progress,
+.uploadProgress {
+    height: 0.5rem;
+    margin: 0.4rem 0;
+    overflow: hidden;
+    border-radius: 999px;
+    background-color: $gray-030;
+}
+
+.progressFill {
+    display: block;
+    height: 100%;
+    background-color: $color-processing;
+    transition: width 0.4s ease;
+}
+
+.tasksPanel {
+    width: 22rem;
+    max-width: 100%;
+    max-height: 50vh;
+    overflow-y: auto;
+    border: 1px solid $gray-040;
+    border-radius: 0.75rem;
+    background-color: $color-panel;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.6);
+
+    &[hidden] {
+        display: none;
+    }
+
+    >summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.6rem 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        list-style: none;
+    }
+
+    .count {
+        min-width: 1.5rem;
+        padding: 0 0.4rem;
+        border-radius: 999px;
+        background-color: $color-accent;
+        text-align: center;
+        font-size: 0.85rem;
+    }
+
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+}
+
+.task {
+    position: relative;
+    padding: 0.75rem 0.9rem;
+    border-top: 1px solid $color-border-soft;
+
+    &--completed .progressFill { background-color: $color-success; }
+    &--failed .progressFill { background-color: $color-danger; }
+    &--queued .progressFill,
+    &--scheduled .progressFill { background-color: $color-waiting; }
+}
+
+.taskHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-right: 2rem;
+}
+
+.taskName {
+    min-width: 0;
+    overflow: hidden;
+    color: $color-text;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.taskLength {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.25rem;
+    color: $color-text-muted;
+    font-size: 0.85rem;
+}
+
+.taskMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    color: $color-text-muted;
+    font-size: 0.8rem;
+}
+
+.taskError {
+    color: $color-danger;
+}
+
+.taskCancel {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+}

@@ -1,0 +1,20 @@
+# Core processing dependencies from the repository root
+-r ../../../requirements.txt
+
+# Web interface
+flask
+Flask-Assets
+libsass
+waitress
+
+# Reading uploaded videos and the recognition data contract
+numpy
+opencv-python-headless
+
+# Word and PDF export
+python-docx
+reportlab
+
+# Tests and linting
+pytest
+ruff

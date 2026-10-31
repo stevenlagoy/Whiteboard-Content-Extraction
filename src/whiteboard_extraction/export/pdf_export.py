@@ -1,6 +1,7 @@
 """Export a BoardDocument to a PDF file."""
 
 from pathlib import Path
+from xml.sax.saxutils import escape
 
 from reportlab.lib.pagesizes import LETTER
 from reportlab.lib.styles import getSampleStyleSheet
@@ -18,7 +19,7 @@ def export_pdf(document: BoardDocument, output_path: Path) -> Path:
     for block in document.blocks:
         minutes, seconds = divmod(int(block.timestamp), 60)
         story.append(Paragraph(f"<b>{minutes:02d}:{seconds:02d}</b>", styles["Normal"]))
-        story.append(Paragraph(block.text, styles["Normal"]))
+        story.append(Paragraph(escape(block.text), styles["Normal"]))
         story.append(Spacer(1, 8))
 
     doc.build(story)
