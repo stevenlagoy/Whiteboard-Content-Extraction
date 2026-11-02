@@ -22,6 +22,7 @@ dependencies = [
     "scikit-learn",
     "matplotlib",
     "pandas",
+    "scikit-image",
 ]
 
 [project.optional-dependencies]

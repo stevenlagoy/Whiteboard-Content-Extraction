@@ -78,3 +78,25 @@ def test_returns_original_frame_objects():
     first = blank()
     result = extract_keyframes([(0.0, first)])
     assert result[0][1] is first
+
+def test_structural_similarity_is_one_for_identical_images():
+    from whiteboard_extraction.video.keyframes import structural_similarity
+
+    image = with_rows(20)
+    assert structural_similarity(image, image.copy()) == 1.0
+
+
+def test_keyframe_selection_rejects_different_image_shapes():
+    import pytest
+
+    frames = [(0.0, np.zeros((20, 20), dtype=np.uint8)),
+              (1.0, np.zeros((30, 20), dtype=np.uint8))]
+    with pytest.raises(ValueError, match="same spatial dimensions"):
+        extract_keyframes(frames)
+
+
+def test_color_and_grayscale_frames_can_be_compared_consistently():
+    gray = np.zeros((100, 100), dtype=np.uint8)
+    color = np.zeros((100, 100, 3), dtype=np.uint8)
+    color[:10] = 255
+    assert frames_differ(gray, color)
