@@ -23,6 +23,8 @@ dependencies = [
     "matplotlib",
     "pandas",
     "scikit-image",
+#    "flask",
+#    "waitress"
 ]
 
 [project.optional-dependencies]
@@ -38,3 +40,7 @@ where = ["src"]
 pythonpath = ["src"]
 testpaths = ["tests"]
 markers = ["real_video: runs against real footage in data/raw/test_footage (slow)"]
+
+
+[tool.setuptools.package-data]
+"whiteboard_extraction.web" = ["templates/*.html", "static/*"]
