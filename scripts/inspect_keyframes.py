@@ -21,7 +21,7 @@ from whiteboard_extraction.video.sampling import sample_frames
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description==__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("video", type=Path)
     parser.add_argument("--interval", type=float, default=2.0, help="seconds between sampled frames")
     parser.add_argument("--threshold", type=float, default=0.02, help="fraction of changed pixels needed to keep a frame")
