@@ -9,7 +9,9 @@ import time
 from pathlib import Path
 
 import cv2
+from scipy import stats
 
+from src.whiteboard_extraction.video import keyframes
 from whiteboard_extraction.data.datasets import PROCESSED_DIR
 from whiteboard_extraction.utils.visualization import (
     format_timestamp,
@@ -50,7 +52,13 @@ def main() -> None:
 
     duration = stats["last_timestamp"]
     print(f"Video length (approx.): {format_timestamp(duration)}")
-    print(f"Sampled {stats["sampled"]} frames, kept {len(keyframes)} keyframes ({len(keyframes) / stats["sampled"]:.0%})")
+    sampled_count = stats["sampled"]
+    percentage = len(keyframes) / sampled_count if sampled_count else 0
+
+    print(
+    f"Sampled {sampled_count} frames, "
+    f"kept {len(keyframes)} keyframes ({percentage:.0%})"
+  )
     print(f"Processing time: {elapsed:.1f}s ({elapsed / max(duration, 1):.2f}x video runtime)\n")
 
     print(f"{'#':>3}  {'time':>8} change vs previous keyframe")
