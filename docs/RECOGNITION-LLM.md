@@ -82,6 +82,16 @@ the default context window; the `-instruct` variants answer directly and are the
 
    or `--provider openai` on the command line, or `MultimodalLLMRecognizer("", provider="openai")` in code.
 
+   On Windows the `NAME=value python ...` prefix used in this document does not work in cmd or
+   PowerShell. Use the flags, which do the same on every platform:
+
+   ```bat
+   python -m whiteboard_extraction.recognition.llm_multimodal --provider openai --model qwen3-vl:2b-instruct path\to\board.png
+   ```
+
+   or set the variable first: `set WCE_LLM_PROVIDER=openai` in cmd, `$env:WCE_LLM_PROVIDER="openai"` in
+   PowerShell. The same goes for `export ANTHROPIC_API_KEY=...` above and the other `WCE_LLM_*` examples below.
+
 What to expect on an 8 GB laptop: the 4b models are too slow there; `qwen3-vl:2b-instruct` answered
 all 12 board frames sampled from the team's two test clips (640 px wide) at about 9 seconds per frame,
 including the first call that loads the model, and the slope and induction formulas came out as

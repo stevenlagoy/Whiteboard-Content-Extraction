@@ -415,6 +415,7 @@ def test_missing_api_key_gives_clear_error(monkeypatch):
 
 
 def test_api_key_is_read_at_call_time(monkeypatch):
+    pytest.importorskip("anthropic")
     monkeypatch.delenv(API_KEY_ENV, raising=False)
     recognizer = MultimodalLLMRecognizer("")  # constructing without a key is fine
     monkeypatch.setenv(API_KEY_ENV, "test-key")
