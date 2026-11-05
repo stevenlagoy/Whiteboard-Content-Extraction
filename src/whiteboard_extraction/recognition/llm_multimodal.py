@@ -55,7 +55,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from whiteboard_extraction.recognition.base import RecognizedBlock
+from whiteboard_extraction.recognition.base import KINDS, RecognizedBlock
 
 PROVIDERS = ("anthropic", "openai")
 DEFAULT_PROVIDER = "anthropic"
@@ -99,7 +99,6 @@ RESPONSE_FORMAT: dict[str, Any] = {
 # Long-edge limit of the high-resolution vision tier (Claude 4.7 and later). The API
 # downscales anything larger itself, so sending more pixels only costs upload time.
 MAX_IMAGE_SIDE = 2576
-VALID_KINDS = ("prose", "equation")
 
 SYSTEM_PROMPT = """\
 You transcribe photographs of lecture whiteboards and blackboards into structured notes for \
@@ -196,7 +195,7 @@ def parse_blocks(reply: str, collapse_repeats: bool = True) -> list[dict[str, An
 
     Tolerates Markdown code fences and stray prose around the array. Raises ``RuntimeError``
     (with an excerpt of the reply) when there is no JSON array, when an element is malformed,
-    or when a ``kind`` is not one of ``VALID_KINDS``. Blocks with empty text are dropped, and
+    or when a ``kind`` is not one of ``KINDS``. Blocks with empty text are dropped, and
     with ``collapse_repeats`` a block that repeats the previous one is dropped too: small models
     sometimes loop on a formula and emit it five times.
     """
@@ -250,9 +249,9 @@ def _validate_block(index: int, item: Any, reply: str) -> dict[str, Any] | None:
     kind = item.get("kind")
     if not isinstance(text, str):
         raise RuntimeError(f"LLM reply element {index} has no string 'text': {_excerpt(reply)!r}")
-    if not isinstance(kind, str) or kind.strip().lower() not in VALID_KINDS:
+    if not isinstance(kind, str) or kind.strip().lower() not in KINDS:
         raise RuntimeError(
-            f"LLM reply element {index} has invalid kind {kind!r} (expected one of {VALID_KINDS}): "
+            f"LLM reply element {index} has invalid kind {kind!r} (expected one of {KINDS}): "
             f"{_excerpt(reply)!r}"
         )
     text = text.strip()
