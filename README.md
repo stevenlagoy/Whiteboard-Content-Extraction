@@ -123,9 +123,11 @@ Also the same across platforms:
 
 ```bash
 python scripts/train.py
-python scripts/evaluate.py
+python scripts/evaluate.py --write-sample data/processed/eval_sample --method oracle blank
 python scripts/benchmark.py
 ```
+
+`scripts/evaluate.py` scores every recognition backend on one labeled test set and prints a comparison table; see [`docs/EVALUATION.md`](docs/EVALUATION.md) for the test-set format and options.
 
 ## Status
 
