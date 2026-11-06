@@ -145,7 +145,3 @@ python scripts/train.py
 python scripts/evaluate.py
 python scripts/benchmark.py
 ```
-
-## Status
-
-The video sampling, board localization, keyframe selection, YOLO occlusion masking, and image enhancement stages are implemented. Recognition, robust temporal reconstruction, export, and parts of the Flask workflow remain under development. See [`docs/PROJECT-PROPOSAL.md`](docs/PROJECT-PROPOSAL.md) for requirements and the project task list.

@@ -208,6 +208,7 @@ def run_pipeline(
             })
             continue
 
+        # Save an annotated full-frame visualization
         x, y, w, h = box
         annotated = frame.copy()
         cv2.rectangle(annotated, (x, y), (x + w, y + h), (0, 255, 0), 3)
@@ -243,11 +244,18 @@ def run_pipeline(
         else:
             occluded_mask = cv2.bitwise_not(visible_mask)
             reconstructed = cv2.inpaint(board, occluded_mask, 3, cv2.INPAINT_TELEA)
+        
         save_image(directories["reconstructed"] / f"{name}.jpg", reconstructed)
 
-        enhanced = reconstructed.copy() if skip_enhancement else enhance_board(reconstructed)
+        # Improve local contrast
+        if skip_enhancement:
+            enhanced = reconstructed.copy()
+        else:
+            enhanced = enhance_board(reconstructed)
+
         save_image(directories["enhanced"] / f"{name}.jpg", enhanced)
         save_image(directories["output"] / f"{name}.jpg", enhanced)
+
         processed_boards.append({
             "filename": name,
             "timestamp_seconds": timestamp,
@@ -258,7 +266,10 @@ def run_pipeline(
     write_csv(
         directories["board_detection"] / "manifest.csv",
         board_rows,
-        ["filename", "timestamp_seconds", "detected", "x", "y", "width", "height", "error"],
+        [
+            "filename", "timestamp_seconds", "detected",
+            "x", "y", "width", "height", "error",
+        ],
     )
     write_csv(
         directories["output"] / "manifest.csv",
@@ -266,21 +277,30 @@ def run_pipeline(
             {
                 "filename": row["filename"] + ".jpg",
                 "timestamp_seconds": row["timestamp_seconds"],
-                "x": row["board_box"][0], "y": row["board_box"][1],
-                "width": row["board_box"][2], "height": row["board_box"][3],
+                "x": row["board_box"][0],
+                "y": row["board_box"][1],
+                "width": row["board_box"][2],
+                "height": row["board_box"][3],
             }
             for row in processed_boards
         ],
-        ["filename", "timestamp_seconds", "x", "y", "width", "height"],
+        [
+            "filename", "timestamp_seconds",
+            "x", "y", "width", "height",
+        ],
     )
 
     print("Creating contact sheets...")
     for directory in directories.values():
         if directory.is_dir():
-            create_directory_contact_sheet(directory)
+            create_directory_contact_sheet(directory)        
 
-    print(f"Finished: {len(processed_boards)}/{len(frames_to_process)} keyframes successfully processed.")
+    print(
+        f"Finished: {len(processed_boards)}/{len(keyframe_rows)} "
+        f"keyframes successfully processed."
+    )
     print(f"Final images: {directories['output']}")
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(

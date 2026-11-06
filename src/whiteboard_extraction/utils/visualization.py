@@ -1,7 +1,7 @@
 """Helpers for saving and viewing pipeline intermediates."""
 
-from collections.abc import Sequence
 from pathlib import Path
+from typing import Sequence
 
 import cv2
 import numpy as np
