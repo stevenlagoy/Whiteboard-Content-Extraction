@@ -9,6 +9,9 @@ pytesseract
 pytest
 python-docx
 reportlab
+pytesseract
+ultralytics
+scikit-image
 ruff
 scikit-learn
 torch

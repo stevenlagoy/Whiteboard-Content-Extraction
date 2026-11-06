@@ -21,7 +21,8 @@ dependencies = [
     "pillow",
     "scikit-learn",
     "matplotlib",
-    "pandas"
+    "pandas",
+    "scikit-image",
 #    "flask",
 #    "waitress"
 ]
@@ -38,9 +39,8 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-markers = [
-    "real_video: tests that need real lecture footage (skipped in CI)",
-]
+markers = ["real_video: runs against real footage in data/raw/test_footage (slow)"]
+
 
 [tool.setuptools.package-data]
 "whiteboard_extraction.web" = ["templates/*.html", "static/*"]

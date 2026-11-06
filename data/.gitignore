@@ -1,0 +1,7 @@
+keyframe_*.jpg
+keyframe_*.png
+sample_*.jpg
+!raw/test_footage/
+raw/test_footage/*
+!raw/test_footage/*.mp4
+!raw/test_footage/sources.md
