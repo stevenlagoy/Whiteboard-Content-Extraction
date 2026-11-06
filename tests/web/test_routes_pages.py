@@ -36,9 +36,9 @@ def test_dashboard_status_tiles_and_engine(client, svc, make_video_in_app):
 def test_dashboard_lists_demo_videos_with_exact_folder_names(demo_client):
     html = demo_client.get("/").get_data(as_text=True)
     assert "CS_593_application_deep_learning" in html and "MA_375_elem_linear_algebra" in html
-    assert html.count('class="videoRow"') == 7 + 2  # seven recents, two favorites
+    assert html.count('class="videoRow"') == 16
     recents = html[html.index('id="recents-heading"'):html.index('id="favorites-heading"')]
-    assert recents.index("Video 6") < recents.index("Video 5")  # newest activity first
+    assert recents.index("Video 6") < recents.index("recent-23h50")  # newest activity first
 
 
 def test_each_row_carries_every_field_in_one_line(demo_client):

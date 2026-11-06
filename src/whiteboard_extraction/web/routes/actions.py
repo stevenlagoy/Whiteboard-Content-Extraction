@@ -120,4 +120,3 @@ def create_job():
 def cancel_job(job_id: str):
     services().jobs.cancel(job_id)
     return ActionResult("Cancelled the task.")
-

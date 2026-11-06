@@ -13,15 +13,29 @@ def test_demo_data_is_seeded_with_stable_ids(make_app, tmp_path):
     library = app.extensions["wce"].library
     labels = [choice.label for choice in library.folder_choices()]
     assert labels == [
-        "My files",
-        "CS_593_application_deep_learning",
-        "CS_593_application_deep_learning › Week 1",
-        "MA_375_elem_linear_algebra",
+        'My files', 'Archive 2025', 'Archive 2025 › Fall', 'Archive 2025 › Fall › Old recordings (do not delete)',
+        'CS_593_application_deep_learning', 'CS_593_application_deep_learning › Midterm review',
+        'CS_593_application_deep_learning › Week 1', 'CS_593_application_deep_learning › Week 1 › Lab sessions',
+        'CS_593_application_deep_learning › Week 1 › Lab sessions › Lab 1 (extra credit)',
+        'CS_593_application_deep_learning › Week 1 › Lab sessions › Lab 1 (extra credit) › Raw recordings',
+        'CS_593_application_deep_learning › Week 2', 'Edge cases and unusual names', 'Edge cases and unusual names › Duplicate names',
+        'Edge cases and unusual names › Empty folder', 'Edge cases and unusual names › Level 1',
+        'Edge cases and unusual names › Level 1 › Level 2', 'Edge cases and unusual names › Level 1 › Level 2 › Level 3',
+        'Edge cases and unusual names › Level 1 › Level 2 › Level 3 › Level 4',
+        'Edge cases and unusual names › Level 1 › Level 2 › Level 3 › Level 4 › Level 5',
+        'Edge cases and unusual names › Level 1 › Level 2 › Level 3 › Level 4 › Level 5 › Level 6',
+        'Edge cases and unusual names › R&D <draft> "notes" \'v2\'', "Edge cases and unusual names › Séminaire d'été 日本語 ✓",
+        'Edge cases and unusual names › Very long folder name Very long folder name Very long folder name Very long folder name Very long folder name Very long!',
+        'Empty top-level folder', 'MA_375_elem_linear_algebra', 'MA_375_elem_linear_algebra › Lectures',
+        'MA_375_elem_linear_algebra › Lectures › Chapter 1: Systems & matrices',
+        'MA_375_elem_linear_algebra › Lectures › Chapter 2: Vector spaces', 'MA_375_elem_linear_algebra › Lectures › Chapter 3: Eigenvalues',
+        'MA_375_elem_linear_algebra › Office hours', 'misc notes (lowercase sorts among capitals)', 'PHYS_201_classical_mechanics',
+        'PHYS_201_classical_mechanics › Weekly lectures', 'Week 1'
     ]
     assert library.get_folder("demo-week-1").parent_id == "demo-cs-593"
     assert library.get_video("demo-video-1").favorite and library.get_video("demo-video-6").favorite
     assert library.get_video("demo-video-2").ocr_blocks and not library.get_video("demo-video-3").processed_at
-    assert len(library.all_videos()) == 7
+    assert len(library.all_videos()) == 94
 
 
 def test_demo_data_is_not_seeded_over_existing_content(make_app, tmp_path):

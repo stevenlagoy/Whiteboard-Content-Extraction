@@ -115,7 +115,8 @@ class StatusService:
         if job is not None and job.state is JobState.QUEUED:
             return VideoStatus("queued", _STATUS_LABELS["queued"])
         if job is not None and job.state is JobState.SCHEDULED:
-            return VideoStatus("scheduled", _STATUS_LABELS["scheduled"], f"Starts {job.scheduled_for:%b} {job.scheduled_for.day}, {job.scheduled_for:%H:%M}")
+            return VideoStatus("scheduled", _STATUS_LABELS["scheduled"],
+                               f"Starts {job.scheduled_for:%b} {job.scheduled_for.day}, {job.scheduled_for:%H:%M}")
         kind = "processed" if video.processed_at else "not-processed"
         return VideoStatus(kind, _STATUS_LABELS[kind])
 

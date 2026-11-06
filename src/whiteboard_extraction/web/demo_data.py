@@ -121,7 +121,8 @@ def _notes(count: int, end: float, start: float = 0.0, offset: int = 0) -> tuple
 def _course_notes(length: float) -> tuple[RecognizedBlock, ...]:
     return (
         RecognizedBlock("Linear transformations preserve addition and scaling", "prose", round(length * 0.1, 2)),
-        RecognizedBlock(r"T(a\mathbf{u} + b\mathbf{v}) = aT(\mathbf{u}) + bT(\mathbf{v})", "equation", round(length * 0.35, 2)),
+        RecognizedBlock(r"T(a\mathbf{u} + b\mathbf{v}) = aT(\mathbf{u}) + bT(\mathbf{v})",
+                        "equation", round(length * 0.35, 2)),
         RecognizedBlock(r"\det(A - \lambda I) = 0", "equation", round(length * 0.7, 2)),
     )
 
@@ -218,7 +219,8 @@ def _catalog(now: datetime) -> list[DemoVideo]:
 
     def done(key, name, folder, length, uploaded, blocks, *, minutes=18, **extra) -> DemoVideo:
         """A processed video; processing finished `minutes` after the upload."""
-        return DemoVideo(key, name, folder, length, uploaded, blocks=blocks, processed=after(uploaded, minutes=minutes), **extra)
+        return DemoVideo(key, name, folder, length, uploaded, blocks=blocks,
+                         processed=after(uploaded, minutes=minutes), **extra)
 
     def waiting(key, name, folder, length, uploaded, *jobs, **extra) -> DemoVideo:
         return DemoVideo(key, name, folder, length, uploaded, jobs=jobs, **extra)
@@ -247,7 +249,8 @@ def _catalog(now: datetime) -> list[DemoVideo]:
         waiting("scheduled-tomorrow", "Scheduled for tomorrow morning", "demo-week-2", 72 * 60, ago(minutes=30),
                 DemoJob(JobState.SCHEDULED, ago(minutes=29),
                         scheduled_for=(now + timedelta(days=1)).replace(hour=9, minute=0, second=0, microsecond=0))),
-        waiting("failed-long", "Failed with a very long error message", "demo-midterm", 2 * 3600 + 5 * 60 + 30, ago(minutes=70),
+        waiting("failed-long", "Failed with a very long error message",
+                "demo-midterm", 2 * 3600 + 5 * 60 + 30, ago(minutes=70),
                 DemoJob(JobState.FAILED, ago(minutes=69), ago(minutes=68), ago(minutes=62), LONG_ERROR, 0.62)),
         DemoVideo("tiny", "Two-second clip", "demo-edge", 2.0, ago(hours=2),
                   blocks=(RecognizedBlock("Hello", "prose", 0.0, 0.99),), processed=ago(minutes=100)),
@@ -290,7 +293,8 @@ def _catalog(now: datetime) -> list[DemoVideo]:
                                 ago(days=5, hours=19), progress=1.0))),
         DemoVideo("ok-then-failed", "Processed, then a re-run failed (text kept, status Failed)", "demo-ma-ch3", 57 * 60,
                   ago(days=10), blocks=_notes(9, 57 * 60), processed=ago(days=9),
-                  jobs=(DemoJob(JobState.COMPLETED, ago(days=9, minutes=20), ago(days=9, minutes=19), ago(days=9), progress=1.0),
+                  jobs=(DemoJob(JobState.COMPLETED, ago(days=9, minutes=20),
+                                ago(days=9, minutes=19), ago(days=9), progress=1.0),
                         DemoJob(JobState.FAILED, ago(days=2), ago(days=2), ago(days=2) + timedelta(minutes=1),
                                 "Demo failure: the re-run could not open the video file.", 0.0))),
     ]
@@ -378,7 +382,8 @@ def _catalog(now: datetime) -> list[DemoVideo]:
         waiting("lab-qa", "Lab Q&A (never processed)", "demo-lab-sessions", 12 * 60, ago(days=43)),
         done("lab1-demo", "Lab 1 demonstration", "demo-lab-1", 22 * 60, ago(days=41), _notes(6, 22 * 60)),
         done("lab1-raw-a", "Lab 1 raw recording, part A", "demo-lab-1-raw", 1694, ago(days=40), _notes(18, 1694)),
-        done("w2-lecture", "Week 2 lecture: backpropagation", "demo-week-2", 78 * 60 + 20, ago(days=9), _notes(22, 78 * 60 + 20)),
+        done("w2-lecture", "Week 2 lecture: backpropagation", "demo-week-2", 78 * 60 + 20,
+             ago(days=9), _notes(22, 78 * 60 + 20)),
         done("ch1-gauss", "Gaussian elimination", "demo-ma-ch1", 55 * 60, ago(days=35), _notes(12, 55 * 60)),
         done("ch1-matrices", "Matrix multiplication", "demo-ma-ch1", 49 * 60, ago(days=34), _notes(9, 49 * 60)),
         done("ch2-span", "Span and independence", "demo-ma-ch2", 52 * 60, ago(days=28), _notes(11, 52 * 60)),
@@ -405,7 +410,8 @@ def _physics_lectures(ago, after) -> list[DemoVideo]:
         length = _PHYSICS_LENGTHS[number % len(_PHYSICS_LENGTHS)]
         uploaded = ago(days=175 - 7 * (number - 1))
         common = dict(key=f"phys-{number:02d}", name=f"Lecture {number:02d}: {topic}", folder="demo-phys-weekly",
-                      length=length, uploaded=uploaded, favorite=number in (1, 12), filename=f"phys201-lecture-{number:02d}.mp4")
+                      length=length, uploaded=uploaded, favorite=number in (1, 12),
+                      filename=f"phys201-lecture-{number:02d}.mp4")
         if number == 13:
             lectures.append(DemoVideo(**common, jobs=(DemoJob(
                 JobState.FAILED, uploaded, uploaded, uploaded + timedelta(minutes=2),
