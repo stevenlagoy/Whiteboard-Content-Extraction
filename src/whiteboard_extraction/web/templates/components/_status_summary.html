@@ -1,0 +1,11 @@
+<section class="statusSummary" aria-labelledby="status-heading">
+    <h2 id="status-heading">Status</h2>
+    <p class="statusHeadline">{{ status.headline }}</p>
+    <ul class="statTiles">
+        <li class="stat stat--processing"><span class="statValue">{{ status.processing }}</span><span class="statLabel">Processing now</span></li>
+        <li class="stat"><span class="statValue">{{ status.waiting }}</span><span class="statLabel">Waiting to start</span></li>
+        <li class="stat"><span class="statValue">{{ status.completed_recently }}</span><span class="statLabel">Completed in the last 24 hours</span></li>
+        <li class="stat stat--failed{% if not status.failed %} is-zero{% endif %}"><span class="statValue">{{ status.failed }}</span><span class="statLabel">Failed, need attention</span></li>
+    </ul>
+    <p class="engineNote">Recognition engine: {{ status.engine_name }}</p>
+</section>

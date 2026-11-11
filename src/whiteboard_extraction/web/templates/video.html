@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% from "components/_icons.html" import icon %}
+{% from "components/_breadcrumb.html" import breadcrumb %}
+{% from "components/_status.html" import status_badge %}
+{% from "components/_forms.html" import next_field with context %}
+
+{% block title %}{{ video.name }}{% endblock %}
+{% block main_attrs %} data-live="reload"{% endblock %}
+
+{% block main %}
+{% set status = status_of(video) %}
+{% set here = url_for('pages.video', video_id=video.id) %}
+{% set leave_to = url_for('pages.folder', folder_id=video.folder_id) if video.folder_id else url_for('pages.dashboard') %}
+{{ breadcrumb(path, video.name) }}
+<header class="pageHeader">
+    <h1>{{ video.name }}</h1>
+    <div class="pageActions">
+        <form method="post" action="{{ url_for('actions.set_favorite', video_id=video.id) }}">
+            {{ next_field(here) }}
+            <input type="hidden" name="favorite" value="{{ 'false' if video.favorite else 'true' }}">
+            <button type="submit" class="button" aria-pressed="{{ 'true' if video.favorite else 'false' }}">
+                {{ icon('star-filled' if video.favorite else 'star') }}<span>{{ 'Favorited' if video.favorite else 'Favorite' }}</span>
+            </button>
+        </form>
+        {% for fmt in formats %}
+            {% if video.ocr_blocks %}
+            <a class="button" href="{{ url_for('files.export', video_id=video.id, format_key=fmt.key) }}">{{ icon('download') }}<span>Export {{ fmt.label }}</span></a>
+            {% else %}
+            <button type="button" class="button" disabled>{{ icon('download') }}<span>Export {{ fmt.label }}</span></button>
+            {% endif %}
+        {% endfor %}
+    </div>
+</header>
+{% if not video.ocr_blocks %}<p class="hint">Exports become available once the video has recognized text.</p>{% endif %}
+
+<div class="videoLayout">
+    <div class="videoMain">
+        {% if has_media %}
+        <video class="player" controls preload="metadata" data-player src="{{ url_for('files.media', video_id=video.id) }}"></video>
+        {% else %}
+        <div class="playerMissing" role="note">
+            <p>The video file is not stored for this entry, so it cannot be played here.</p>
+        </div>
+        {% endif %}
+
+        <section class="listSection" aria-labelledby="ocr-heading">
+            <h2 id="ocr-heading">Recognized text</h2>
+            <form class="ocrForm" method="post" action="{{ url_for('actions.update_ocr', video_id=video.id) }}">
+                {{ next_field(here) }}
+                <ol class="ocrList">
+                    {% for block in video.ocr_blocks %}
+                    <li class="ocrBlock">
+                        <div class="ocrMeta">
+                            <label class="visually-hidden" for="ocr-time-{{ loop.index0 }}">Timestamp of block {{ loop.index }}</label>
+                            <input id="ocr-time-{{ loop.index0 }}" name="timestamp" value="{{ block.timestamp|timecode }}" size="8" inputmode="text" autocomplete="off">
+                            {% if has_media %}<button type="button" class="iconButton" data-seek="{{ block.timestamp }}" aria-label="Play from {{ block.timestamp|timecode }}" title="Play from here">{{ icon('play', 16) }}</button>{% endif %}
+                            <label class="visually-hidden" for="ocr-kind-{{ loop.index0 }}">Type of block {{ loop.index }}</label>
+                            <select id="ocr-kind-{{ loop.index0 }}" name="kind">
+                                <option value="prose"{% if block.kind == 'prose' %} selected{% endif %}>Prose</option>
+                                <option value="equation"{% if block.kind == 'equation' %} selected{% endif %}>Equation</option>
+                            </select>
+                            <label class="checkbox"><input type="checkbox" name="remove" value="{{ loop.index0 }}"> Remove</label>
+                        </div>
+                        <label class="visually-hidden" for="ocr-text-{{ loop.index0 }}">Text of block {{ loop.index }}</label>
+                        <textarea id="ocr-text-{{ loop.index0 }}" name="text" rows="2">{{ block.text }}</textarea>
+                    </li>
+                    {% endfor %}
+                    {% set new_index = video.ocr_blocks|length %}
+                    <li class="ocrBlock ocrBlock--new">
+                        <div class="ocrMeta">
+                            <label for="ocr-time-{{ new_index }}">New block at</label>
+                            <input id="ocr-time-{{ new_index }}" name="timestamp" value="0:00" size="8" inputmode="text" autocomplete="off">
+                            <label class="visually-hidden" for="ocr-kind-{{ new_index }}">Type of new block</label>
+                            <select id="ocr-kind-{{ new_index }}" name="kind">
+                                <option value="prose">Prose</option>
+                                <option value="equation">Equation</option>
+                            </select>
+                        </div>
+                        <label class="visually-hidden" for="ocr-text-{{ new_index }}">Text of new block</label>
+                        <textarea id="ocr-text-{{ new_index }}" name="text" rows="2" placeholder="Add a block of text (optional)"></textarea>
+                    </li>
+                </ol>
+                <button type="submit" class="button primary">Save text</button>
+            </form>
+        </section>
+    </div>
+
+    <aside class="videoDetails" aria-label="Video details">
+        <h2>Details</h2>
+        <dl>
+            <div><dt>Status</dt><dd>{{ status_badge(status) }}{% if status.detail %}<span class="detail">{{ status.detail }}</span>{% endif %}</dd></div>
+            <div><dt>Length</dt><dd>{{ video.length_seconds|timecode }}</dd></div>
+            {% if video.is_trimmed %}<div><dt>Processed clip</dt><dd>{{ video.trim_start|timecode }} to {{ video.clip_end|timecode }} ({{ video.clip_seconds|timecode }})</dd></div>{% endif %}
+            {% if video.source_filename %}<div><dt>Original file</dt><dd>{{ video.source_filename }}</dd></div>{% endif %}
+            <div><dt>Uploaded</dt><dd><time datetime="{{ video.uploaded_at.isoformat() }}">{{ video.uploaded_at|datetime }}</time></dd></div>
+            <div><dt>Edited</dt><dd>{{ video.edited_at|datetime }}</dd></div>
+            <div><dt>Processed</dt><dd>{{ video.processed_at|datetime }}</dd></div>
+            <div><dt>Exported</dt><dd>{{ video.exported_at|datetime }}</dd></div>
+        </dl>
+
+        {% if status.kind in ('failed', 'not-processed') %}
+        <form class="detailForm" method="post" action="{{ url_for('actions.process_video', video_id=video.id) }}">
+            {{ next_field(here) }}
+            <button type="submit" class="button primary">{{ 'Retry processing' if status.kind == 'failed' else 'Process this video' }}</button>
+        </form>
+        {% endif %}
+
+        <form class="detailForm" method="post" action="{{ url_for('actions.rename_video', video_id=video.id) }}">
+            {{ next_field(here) }}
+            <label for="video-name">Name</label>
+            <input id="video-name" name="name" value="{{ video.name }}" required maxlength="120" autocomplete="off">
+            <button type="submit" class="button">Rename</button>
+        </form>
+
+        <form class="detailForm" method="post" action="{{ url_for('actions.move_video', video_id=video.id) }}">
+            {{ next_field(here) }}
+            <label for="video-folder">Location</label>
+            <select id="video-folder" name="folder_id">
+                {% for choice in folder_choices() %}
+                <option value="{{ choice.id or '' }}"{% if choice.id == video.folder_id %} selected{% endif %}>{{ choice.label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="button">Move</button>
+        </form>
+
+        <form class="detailForm" method="post" action="{{ url_for('actions.delete_video', video_id=video.id) }}"
+              data-confirm='Delete "{{ video.name }}"? This cannot be undone.'>
+            {{ next_field(leave_to) }}
+            <button type="submit" class="button danger">{{ icon('trash', 18) }}<span>Delete video</span></button>
+        </form>
+    </aside>
+</div>
+{% endblock %}
