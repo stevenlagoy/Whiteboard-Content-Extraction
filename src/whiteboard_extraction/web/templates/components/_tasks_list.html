@@ -1,0 +1,33 @@
+{% from "components/_icons.html" import icon %}
+{% from "components/_forms.html" import next_field with context %}
+{% set panel = task_panel() %}
+<div class="tasksList" data-signature="{{ panel.signature }}" data-active="{{ panel.active_count }}" data-total="{{ panel.tasks|length }}">
+    <ul>
+        {% for task in panel.tasks %}
+        <li class="task task--{{ task.state.value }}">
+            <div class="taskHead">
+                <a class="taskName" href="{{ url_for('pages.video', video_id=task.video_id) }}" title="{{ task.name }}">{{ task.name }}</a>
+                <span class="taskLength">{{ icon('clock', 14) }}<span class="visually-hidden">Video length: </span>{{ task.clip_seconds|timecode }}</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progress for {{ task.name }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ task.percent }}">
+                <span class="progressFill" style="width: {{ task.percent }}%"></span>
+            </div>
+            <div class="taskMeta">
+                <span>{{ task.label }}{% if task.starts_at %} for {{ task.starts_at|datetime }}{% endif %}</span>
+                {% if task.elapsed_seconds is not none %}<span>Elapsed {{ task.elapsed_seconds|timecode }}</span>{% endif %}
+                {% if task.remaining_seconds is not none %}
+                    {% if task.state.value == 'running' %}<span>About {{ task.remaining_seconds|timecode }} left</span>
+                    {% else %}<span>Estimated {{ task.estimated_seconds|timecode }}</span>{% endif %}
+                {% endif %}
+                {% if task.error %}<span class="taskError">{{ task.error }}</span>{% endif %}
+            </div>
+            {% if task.can_cancel %}
+            <form class="taskCancel" method="post" action="{{ url_for('actions.cancel_job', job_id=task.job_id) }}" data-enhance>
+                {{ next_field() }}
+                <button type="submit" class="iconButton" aria-label="Cancel processing {{ task.name }}" title="Cancel">{{ icon('x', 16) }}</button>
+            </form>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</div>

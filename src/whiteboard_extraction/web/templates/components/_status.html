@@ -1,0 +1,8 @@
+{% from "components/_icons.html" import icon %}
+{# Status is shown with an icon and a word, never by color alone. #}
+{% macro status_badge(status) %}
+{% set icons = {'processing': 'spinner', 'processed': 'check-circle', 'failed': 'alert', 'queued': 'clock', 'scheduled': 'clock'} %}
+<span class="badge badge--{{ status.kind }}"{% if status.detail %} title="{{ status.detail }}"{% endif %}>
+    {{ icon(icons.get(status.kind, 'minus-circle'), 16) }}<span>{{ status.label }}</span>
+</span>
+{% endmacro %}

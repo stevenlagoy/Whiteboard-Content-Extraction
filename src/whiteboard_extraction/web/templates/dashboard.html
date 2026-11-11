@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "components/_icons.html" import icon %}
+{% from "components/_video_rows.html" import video_list with context %}
+
+{% block title %}Dashboard{% endblock %}
+{% block main_attrs %} data-live="swap"{% endblock %}
+
+{% block main %}
+<header class="pageHeader">
+    <h1>Dashboard</h1>
+    <a class="button primary" href="{{ url_for('pages.upload') }}">{{ icon('upload') }}<span>Upload a video</span></a>
+</header>
+
+{% include "components/_status_summary.html" %}
+
+<section class="listSection" aria-labelledby="recents-heading">
+    <h2 id="recents-heading">Recents</h2>
+    {{ video_list(recents, 'recents', 'No videos yet. Upload one to get started.') }}
+</section>
+
+<section class="listSection" aria-labelledby="favorites-heading">
+    <h2 id="favorites-heading">Favorites</h2>
+    {{ video_list(favorites, 'favorites', 'No favorites yet. Select the star beside a video to add it here.') }}
+</section>
+{% endblock %}

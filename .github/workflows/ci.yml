@@ -36,6 +36,7 @@ jobs:
         python -m pip install flake8 pytest
         python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
         if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+        if [ -f ./src/whiteboard_extraction/web/webapp.txt ]; then python -m pip install -r ./src/whiteboard_extraction/web/webapp.txt; fi
         python -m pip install -e .
 
     - name: Lint with flake8
