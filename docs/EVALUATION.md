@@ -95,6 +95,23 @@ protocol in `recognition/base.py`) can be scored. Give it a name in
 `whiteboard_extraction.evaluation.evaluate_predictor` scores any function from a `Sample` to
 blocks, which is how the baselines and the tests work.
 
+## Output format
+
+Every method has to return its result in the same form, because reconstruction and export read
+it without knowing which method ran. For one keyframe, `recognize(timestamp, image)` returns:
+
+* a `list` of `RecognizedBlock`, empty for a blank board;
+* `text`: a `str` with something in it (leave empty blocks out);
+* `kind`: `"equation"` or `"prose"`, spelled exactly;
+* `timestamp`: the keyframe's timestamp, the number that was passed in;
+* `confidence`: `None`, or a number from 0 to 1.
+
+`whiteboard_extraction.evaluation.block_problems(blocks, timestamp)` checks these rules and
+returns what is wrong in plain words, or an empty list. `tests/test_recognizer_conformance.py`
+runs it on every method in the registry, so a new method is checked as soon as it is registered.
+A method that is still a stub is skipped until it is implemented. A method that needs a service,
+an engine or a model file gets an entry in that file's `OFFLINE_SETUP` so the test runs without it.
+
 ## Limits
 
 * Text metrics tokenize on whitespace, so `x^2+1` and `x^2 + 1` count as different words.
