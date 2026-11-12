@@ -1,14 +1,19 @@
 import numpy as np
 import pytest
+from web_fakes import InlineExecutor
 
+from whiteboard_extraction.recognition import registry as recognition_registry
 from whiteboard_extraction.recognition.base import RecognizedBlock
 from whiteboard_extraction.reconstruction.document import build_document
 from whiteboard_extraction.web.config import AppConfig
 from whiteboard_extraction.web.domain.errors import JobCancelled
+from whiteboard_extraction.web.domain.models import JobState
 from whiteboard_extraction.web.processing.base import ProcessingRequest
 from whiteboard_extraction.web.processing.pipeline import PipelineEngine, PipelineStages
 from whiteboard_extraction.web.processing.registry import build_engine
+from whiteboard_extraction.web.processing.runner import JobRunner
 from whiteboard_extraction.web.processing.simulated import SAMPLE_BLOCKS, SimulatedEngine
+from whiteboard_extraction.web.storage import MediaStorage
 
 
 class Recorder:
@@ -70,6 +75,13 @@ class FakeRecognizer:
         return [RecognizedBlock(f"t{timestamp:g}", "prose", timestamp)]
 
 
+class DiagramRecognizer:
+    """Returns a kind the rest of the pipeline does not know."""
+
+    def recognize(self, timestamp, image):
+        return [RecognizedBlock("a sketch", "diagram", timestamp)]
+
+
 def stages(frames, keep_every=1):
     seen = {}
 
@@ -104,10 +116,30 @@ def test_pipeline_recognizes_only_the_selected_keyframes():
     assert recognizer.calls == [0, 2]
 
 
+def test_pipeline_reports_the_same_fractions_at_each_stage():
+    fake_stages, _ = stages([0, 10])
+    reporter = Recorder()
+    PipelineEngine(FakeRecognizer(), fake_stages).process(request(), reporter)
+    assert reporter.values == pytest.approx([0.3, 0.4, 0.5, 0.75, 1.0, 1.0])
+
+
 def test_pipeline_with_no_frames_returns_an_empty_document():
     fake_stages, _ = stages([])
-    document = PipelineEngine(FakeRecognizer(), fake_stages).process(request(), Recorder())
-    assert document.blocks == []
+    reporter = Recorder()
+    document = PipelineEngine(FakeRecognizer(), fake_stages).process(request(), reporter)
+    assert document.blocks == [] and reporter.values == [0.3, 1.0]
+
+
+def test_an_unknown_block_kind_fails_the_job_instead_of_passing_through(jobs, library, make_video, tmp_path):
+    fake_stages, _ = stages([5])
+    engine = PipelineEngine(DiagramRecognizer(), fake_stages)
+    video = make_video(media_file="lecture.mp4")
+    job = jobs.schedule(video.id)
+    JobRunner(jobs, library, engine, MediaStorage(tmp_path), InlineExecutor()).step()
+    failed = jobs.get_job(job.id)
+    assert failed.state is JobState.FAILED
+    assert failed.error == "DiagramRecognizer returned kind 'diagram' at 5.0s; expected one of equation, prose."
+    assert not library.get_video(video.id).ocr_blocks
 
 
 def test_pipeline_needs_the_original_file():
@@ -132,6 +164,21 @@ def test_registry_builds_each_engine():
     assert isinstance(build_engine(AppConfig(engine="simulated")), SimulatedEngine)
     assert isinstance(build_engine(AppConfig(engine="pipeline", recognizer="ocr")), PipelineEngine)
     assert isinstance(build_engine(AppConfig(engine="pipeline", recognizer="llm", llm_model="m")), PipelineEngine)
+
+
+def test_registry_selects_the_recognizer_through_the_recognition_registry(monkeypatch):
+    recognizer, options_seen = FakeRecognizer(), []
+
+    def factory(options):
+        options_seen.append(options)
+        return recognizer
+
+    monkeypatch.setitem(recognition_registry._FACTORIES, "fake", factory)
+    monkeypatch.setattr(PipelineStages, "default", classmethod(lambda cls: stages([0, 10])[0]))
+    engine = build_engine(AppConfig(engine="pipeline", recognizer="fake", llm_model="m", cnn_checkpoint="c.pt"))
+    engine.process(request(), Recorder())
+    assert recognizer.calls == [0, 10]
+    assert (options_seen[0].llm_model, options_seen[0].cnn_checkpoint) == ("m", "c.pt")
 
 
 def test_registry_rejects_unknown_names():
