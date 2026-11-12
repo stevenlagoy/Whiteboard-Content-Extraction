@@ -6,6 +6,7 @@ import importlib.util
 import json
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from whiteboard_extraction.evaluation.metrics import (
@@ -15,6 +16,7 @@ from whiteboard_extraction.evaluation.report import load_results, render_report,
 from whiteboard_extraction.evaluation.runner import MethodResult, evaluate_named, evaluate_predictor, recognizer_predictor
 from whiteboard_extraction.evaluation.synthetic import write_synthetic_test_set
 from whiteboard_extraction.evaluation.testset import TestSetError, load_test_set, write_manifest
+from whiteboard_extraction.recognition import registry
 from whiteboard_extraction.recognition.base import RecognizedBlock
 from whiteboard_extraction.recognition.registry import build_recognizer
 
@@ -181,9 +183,20 @@ def test_registry_builds_backends_lazily_and_rejects_unknown_names():
         build_recognizer("nope")
 
 
-def test_unimplemented_backends_are_reported_not_raised(samples):
+class Stub:
+    def recognize(self, timestamp, image):
+        raise NotImplementedError("later")
+
+
+@pytest.fixture
+def stub_ocr(monkeypatch):
+    """Make `ocr` a stub for the test, so it keeps passing once the real backend is implemented."""
+    monkeypatch.setitem(registry._FACTORIES, "ocr", lambda options: Stub())
+
+
+def test_unimplemented_backends_are_reported_not_raised(samples, stub_ocr):
     result = evaluate_named("ocr", samples)
-    assert result.metrics is None and result.error.startswith("not implemented")
+    assert result.metrics is None and result.error == "not implemented (later)"
 
 
 # ------------------------------------------------------------------------------- report
@@ -214,7 +227,7 @@ def load_script():
     return module
 
 
-def test_cli_end_to_end(tmp_path, capsys):
+def test_cli_end_to_end(tmp_path, capsys, stub_ocr):
     script = load_script()
     out_json = tmp_path / "results.json"
     code = script.main(["--write-sample", str(tmp_path / "set"), "--method", "oracle", "blank", "--json", str(out_json)])
@@ -225,7 +238,7 @@ def test_cli_end_to_end(tmp_path, capsys):
     assert script.main(["--load", str(out_json)]) == 0
     assert "| blank | 4 |" in capsys.readouterr().out
 
-    assert script.main(["--test-set", str(tmp_path / "set"), "--method", "ocr"]) == 1  # nothing scored yet
+    assert script.main(["--test-set", str(tmp_path / "set"), "--method", "ocr"]) == 1  # a stub scores nothing
     assert "not implemented" in capsys.readouterr().out
 
 
@@ -278,6 +291,16 @@ def test_a_failure_on_one_sample_is_scored_as_nothing_and_kept(samples, capsys):
     assert "RuntimeError: decoder crashed" in capsys.readouterr().err  # the traceback went to stderr
     text = render_report([result])
     assert "1 of 4 samples failed" in text and "board_02.png: RuntimeError: decoder crashed" in text
+
+
+def test_numpy_numbers_from_a_backend_can_be_saved(tmp_path, samples):
+    def predict(sample):
+        return [RecognizedBlock(b.text, b.kind, np.float64(sample.timestamp), np.float32(0.5)) for b in sample.blocks]
+
+    path = tmp_path / "results.json"
+    save_results(path, [evaluate_predictor("numpy", predict, samples)])
+    saved = load_results(path)[0].samples[0].predicted[0]
+    assert saved.timestamp == samples[0].timestamp and saved.confidence == 0.5
 
 
 def test_provenance_survives_the_json_round_trip(tmp_path, samples):

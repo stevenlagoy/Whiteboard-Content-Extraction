@@ -5,8 +5,9 @@ set and prints a single comparison table, so the custom CNN, the pretrained OCR 
 multimodal LLM can be compared on equal terms (issue #14, user story 11). Every number comes
 from a repeatable script run, never from a hand calculation.
 
-Today only the `oracle` and `blank` baselines produce numbers: `ocr`, `llm` and `cnn` print `n/a`
-until #12, #13 and #40 land. Accuracy, precision, recall, F1 and the confusion matrix score the
+Today the `oracle` and `blank` baselines and the `llm` method produce numbers; `ocr` and `cnn`
+print `n/a` until #12 and #40 land. The `llm` method takes its provider, model and key from the
+`WCE_LLM_*` variables described in `docs/RECOGNITION-LLM.md`. Accuracy, precision, recall, F1 and the confusion matrix score the
 block kind (prose or equation); how well the text itself was read is WER, CER and exact match.
 
 ## Quick start
@@ -58,7 +59,8 @@ object per line:
 To build one from real footage, run the video pipeline to get cropped keyframes, copy the ones
 to label into the folder, and write their text by hand. Keep the manifest in the folder next to
 the images so the set can be zipped and shared. `data/raw/` and `data/processed/` are the
-intended homes and are not meant to be committed. `--write-sample` refuses to overwrite a folder
+intended homes. Git ignores only the sample set and `results/`, so adding a real test set to the
+repository is a deliberate choice. `--write-sample` refuses to overwrite a folder
 that already holds a test set unless `--force` is given.
 
 ## What the numbers mean
@@ -109,8 +111,9 @@ it without knowing which method ran. For one keyframe, `recognize(timestamp, ima
 `whiteboard_extraction.evaluation.block_problems(blocks, timestamp)` checks these rules and
 returns what is wrong in plain words, or an empty list. `tests/test_recognizer_conformance.py`
 runs it on every method in the registry, so a new method is checked as soon as it is registered.
-A method that is still a stub is skipped until it is implemented. A method that needs a service,
-an engine or a model file gets an entry in that file's `OFFLINE_SETUP` so the test runs without it.
+Each method is given a board with printed text and has to return at least one block. A method
+that is still a stub is skipped until it is implemented. A method that needs a service, an engine
+or a model file gets an entry in that file's `OFFLINE_SETUP` so the test runs without it.
 
 ## Limits
 

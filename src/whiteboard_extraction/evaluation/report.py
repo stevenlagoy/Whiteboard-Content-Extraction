@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from collections.abc import Sequence
 from dataclasses import asdict
+from numbers import Real
 from pathlib import Path
 from typing import Any
 
@@ -101,8 +102,14 @@ def render_report(results: Sequence[MethodResult], test_set: str | None = None) 
 
 # -------------------------------------------------------------------------------------- JSON
 
+def _plain(value: Any) -> Any:
+    """A NumPy number becomes a float so json can write it; anything else is left as it is."""
+    return float(value) if isinstance(value, Real) and not isinstance(value, bool) else value
+
+
 def _block_to_json(block: RecognizedBlock) -> dict[str, Any]:
-    return {"text": block.text, "kind": block.kind, "timestamp": block.timestamp, "confidence": block.confidence}
+    return {"text": block.text, "kind": block.kind, "timestamp": _plain(block.timestamp),
+            "confidence": _plain(block.confidence)}
 
 
 def _block_from_json(data: dict[str, Any]) -> RecognizedBlock:

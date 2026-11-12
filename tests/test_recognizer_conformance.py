@@ -1,19 +1,19 @@
 """Every recognition method must return its output in the same form.
 
-``test_method_output_conforms`` runs each method in the registry on a small board and checks the
-result with ``block_problems``. A method added to ``recognition/registry.py`` is picked up
-automatically, with nothing to add here.
+``test_method_output_conforms`` runs each method in the registry on a board with printed text
+and checks the result with ``block_problems``. A method added to ``recognition/registry.py`` is
+picked up automatically, with nothing to add here.
 
 The methods run offline. One that needs a service gets an entry in ``OFFLINE_SETUP`` that answers
 its request locally, so the method's own code still runs. A stub that raises
-``NotImplementedError`` is skipped and starts being checked the day it is implemented. A new
-method that needs an engine or a model file should add an ``OFFLINE_SETUP`` entry the same way.
+``NotImplementedError`` is skipped and starts being checked the day it is implemented, so a
+finished method must not raise it. A new method that needs an engine or a model file should add an
+``OFFLINE_SETUP`` entry the same way; every method that runs has to find at least one block.
 """
 
 import dataclasses
 import json
 
-import numpy as np
 import pytest
 
 from whiteboard_extraction.evaluation import block_problems, load_test_set
@@ -24,19 +24,21 @@ from whiteboard_extraction.recognition.registry import RECOGNIZER_NAMES, build_r
 TIMESTAMP = 12.5
 OPTIONAL_PACKAGES = {"anthropic", "easyocr", "pytesseract", "torch"}  # a method is skipped where its package is absent
 
+# What a careless model might send: the backend has to turn this into conforming blocks.
 CANNED_LLM_REPLY = json.dumps([
     {"text": "Induction", "kind": "prose"},
     {"text": r"S(n) = \frac{n(n+1)}{2}", "kind": "equation", "confidence": 0.9},
-    {"text": "   ", "kind": "prose"},  # the backend has to leave this one out
+    {"text": "S(1) = 1", "kind": "Equation"},  # wrong case
+    {"text": "Base case", "kind": "prose", "confidence": 95},  # a 0-100 score
+    {"text": "   ", "kind": "prose"},  # blank
 ])
 
 
-def board() -> np.ndarray:
-    """A small white BGR board with two dark strokes, the layout the video stage hands over."""
-    image = np.full((180, 320, 3), 255, dtype=np.uint8)
-    image[60:64, 40:280] = 0
-    image[100:104, 40:200] = 0
-    return image
+@pytest.fixture
+def board(tmp_path):
+    """A rendered BGR board with printed text, so a method that reads has something to find."""
+    write_synthetic_test_set(tmp_path)
+    return load_test_set(tmp_path)[0].load_image()
 
 
 def _llm_offline(monkeypatch) -> None:
@@ -59,21 +61,28 @@ OFFLINE_SETUP = {"llm": _llm_offline}  # method name -> function(monkeypatch) th
 
 
 @pytest.mark.parametrize("name", RECOGNIZER_NAMES)
-def test_method_output_conforms(name, monkeypatch):
+def test_method_output_conforms(name, board, monkeypatch):
     setup = OFFLINE_SETUP.get(name)
     if setup is not None:
         setup(monkeypatch)
     try:
-        blocks = build_recognizer(name).recognize(TIMESTAMP, board())
+        blocks = build_recognizer(name).recognize(TIMESTAMP, board)
     except NotImplementedError as error:
         pytest.skip(f"{name} is not implemented yet ({error})")
-    except ImportError as error:
+    except ModuleNotFoundError as error:  # a missing package; a wrong import from an installed one still fails
         if error.name not in OPTIONAL_PACKAGES:
             raise
         pytest.skip(f"{name} needs the {error.name} package")
     assert block_problems(blocks, TIMESTAMP) == []
-    if setup is not None:
-        assert blocks, f"{name} was given content to read and returned nothing"
+    assert blocks, f"{name} was given a board with text on it and returned nothing"
+
+
+def test_llm_backend_cleans_up_a_careless_reply(board, monkeypatch):
+    _llm_offline(monkeypatch)
+    blocks = build_recognizer("llm").recognize(TIMESTAMP, board)
+    assert [(block.kind, block.confidence) for block in blocks] == [
+        ("prose", None), ("equation", 0.9), ("equation", None), ("prose", None),
+    ]
 
 
 def test_labels_have_the_same_form_as_predictions(tmp_path):
@@ -94,6 +103,7 @@ def test_conforming_output_has_no_problems():
 
 
 def test_numpy_numbers_are_accepted():
+    np = pytest.importorskip("numpy")
     blocks = [good(timestamp=np.float64(TIMESTAMP), confidence=np.float32(0.5))]
     assert block_problems(blocks, TIMESTAMP) == []
 
@@ -126,9 +136,9 @@ def test_every_problem_is_reported_not_only_the_first():
     assert [problem.split(":")[0] for problem in problems] == ["block 0", "block 2", "block 2"]
 
 
-def test_a_method_that_returns_the_wrong_form_is_caught():
+def test_a_method_that_returns_the_wrong_form_is_caught(board):
     class Sloppy:
         def recognize(self, timestamp, image):
             return [RecognizedBlock("x", "math", 0.0, confidence=87)]
 
-    assert len(block_problems(Sloppy().recognize(TIMESTAMP, board()), TIMESTAMP)) == 3
+    assert len(block_problems(Sloppy().recognize(TIMESTAMP, board), TIMESTAMP)) == 3
