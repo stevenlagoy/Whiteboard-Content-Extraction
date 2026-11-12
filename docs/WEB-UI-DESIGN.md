@@ -389,7 +389,7 @@ Without JavaScript the same POST returns the same redirect and the browser loads
 |---|---|---|
 | The recognition method | Pass any object with `name`, `estimate_seconds`, and `process` to `create_app(engine=...)`, or register a factory in `ENGINE_FACTORIES`. | `processing/registry.py` |
 | One step of the real pipeline | Replace a field of `PipelineStages` (sampler, board detector, cropper, keyframe selector, document builder). | `processing/pipeline.py` |
-| Which recognizer the pipeline uses | Set `WCE_RECOGNIZER` or add a branch in `_recognizer`. | `processing/registry.py` |
+| Which recognizer the pipeline uses | Set `WCE_RECOGNIZER`. To add a method, add an entry to `_FACTORIES`; the web app builds it with `build_recognizer` and runs it through `recognize_keyframes`. | `recognition/registry.py` (see `docs/RECOGNITION-INTERFACE.md`) |
 | Storage | Implement the `Repository` protocol and pass it as `create_app(repository=...)`. | `repositories/base.py` |
 | Video probing and thumbnails | Pass any `MediaProbe` as `create_app(media_probe=...)`. | `services/media.py` |
 | Export formats | Add an `ExportFormat` entry (key, label, extension, mimetype, writer). | `services/exports.py` |

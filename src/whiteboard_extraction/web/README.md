@@ -96,7 +96,7 @@ python -m whiteboard_extraction.web.app
 ### Engines
 
 - `simulated` (default): reports steady progress for a time proportional to the clip length (6 seconds to 2 minutes) and returns sample equations and prose. Use it to try the whole interface.
-- `pipeline`: runs the repository's stages in order: frame sampling (`video/sampling.py`), board detection and cropping (`video/segmentation.py`), keyframes (`video/keyframes.py`), the selected recognizer (`recognition/`), and document assembly (`reconstruction/document.py`). A stage that raises an error marks the task as failed and shows the message on the video page.
+- `pipeline`: runs the repository's stages in order: frame sampling (`video/sampling.py`), board detection and cropping (`video/segmentation.py`), keyframes (`video/keyframes.py`), the selected recognizer (`recognition/`, built by `build_recognizer` and run through `recognize_keyframes`), and document assembly (`reconstruction/document.py`). A stage that raises an error marks the task as failed and shows the message on the video page.
 
 ## What is stored where
 

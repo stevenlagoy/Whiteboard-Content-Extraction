@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 
 from whiteboard_extraction.recognition.base import RecognizedBlock, Recognizer
+from whiteboard_extraction.recognition.pipeline import recognize_keyframes
 from whiteboard_extraction.reconstruction.document import BoardDocument
 
 from .base import ProcessingRequest, ProgressReporter
@@ -74,10 +75,13 @@ class PipelineEngine:
             reporter.report(0.3 + 0.2 * index / len(frames))
 
         keyframes = stages.select_keyframes(boards)
-        recognized: list[list[RecognizedBlock]] = []
-        for index, (timestamp, image) in enumerate(keyframes, start=1):
-            recognized.append(self._recognizer.recognize(timestamp, image))
-            reporter.report(0.5 + 0.5 * index / len(keyframes))
+        # The shared call site runs the method and checks what it returns; with no keyframes it
+        # reports nothing, so the final report below still closes the job.
+        recognized = recognize_keyframes(
+            self._recognizer,
+            keyframes,
+            on_progress=lambda done, total: reporter.report(0.5 + 0.5 * done / total),
+        )
 
         reporter.report(1.0)
         return stages.build(recognized)

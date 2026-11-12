@@ -4,24 +4,19 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+from whiteboard_extraction.recognition.base import Recognizer
+from whiteboard_extraction.recognition.registry import build_recognizer
+
 from ..config import AppConfig
 from .base import ProcessingEngine
 from .pipeline import PipelineEngine
 from .simulated import SimulatedEngine
 
 
-def _recognizer(config: AppConfig):
-    # Imported on demand: the CNN backend needs PyTorch.
-    if config.recognizer == "ocr":
-        from whiteboard_extraction.recognition.ocr_pretrained import PretrainedOCRRecognizer
-        return PretrainedOCRRecognizer()
-    if config.recognizer == "llm":
-        from whiteboard_extraction.recognition.llm_multimodal import MultimodalLLMRecognizer
-        return MultimodalLLMRecognizer(config.llm_model)
-    if config.recognizer == "cnn":
-        from whiteboard_extraction.recognition.cnn import CustomCNNRecognizer
-        return CustomCNNRecognizer(config.cnn_checkpoint)
-    raise ValueError(f"Unknown recognizer {config.recognizer!r}; use ocr, llm, or cnn.")
+def _recognizer(config: AppConfig) -> Recognizer:
+    # The recognition registry is the only list of methods. It imports a backend when that
+    # backend is asked for, so the app still starts without PyTorch unless the CNN is selected.
+    return build_recognizer(config.recognizer, llm_model=config.llm_model, cnn_checkpoint=config.cnn_checkpoint)
 
 
 ENGINE_FACTORIES: dict[str, Callable[[AppConfig], ProcessingEngine]] = {
