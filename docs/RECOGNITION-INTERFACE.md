@@ -34,8 +34,9 @@ method = build_recognizer("llm", llm_model="claude-opus-5-5")   # by name, in co
 method = recognizer_from_env()                                   # by configuration
 ```
 
-`recognizer_from_env` reads these variables. `WCE_RECOGNIZER`, `WCE_LLM_MODEL` and `WCE_CNN_CHECKPOINT` are
-the names the web app (PR #39) already reads; `WCE_OCR_ENGINE` is new here.
+`recognizer_from_env` reads these variables. The web app reads `WCE_RECOGNIZER`, `WCE_LLM_MODEL` and
+`WCE_CNN_CHECKPOINT` into its `AppConfig` and passes them to `build_recognizer`; it does not read
+`WCE_OCR_ENGINE` yet, so the OCR method runs there with its default engine.
 
 | Variable | Meaning | Default |
 |---|---|---|
@@ -80,9 +81,10 @@ site into both exporters; the real backends are still stubs on `main` (see the s
    `ENV_SETTINGS` mapping the field to its `WCE_*` variable; `build_recognizer(name, **settings)`
    and `recognizer_from_env` pick it up from there.
 3. It is now available to `build_recognizer` and `WCE_RECOGNIZER`, and through them to the
-   evaluation script's `--method` flag (#14). The web app (PR #39) still carries its own selector
-   in `web/processing/registry.py`; once both merge, that selector should call `build_recognizer`
-   so the registry is the only list of methods.
+   evaluation script's `--method` flag (#14) and to the web app. The web app keeps no list of its
+   own: `web/processing/registry.py` builds the method with `build_recognizer`, and
+   `PipelineEngine` in `web/processing/pipeline.py` runs it through `recognize_keyframes`. A new
+   setting reaches the web app once `web/config.py` reads it into `AppConfig`.
 
 ## Status of the methods
 
