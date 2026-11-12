@@ -1,0 +1,30 @@
+// Typography
+
+body {
+    font-family: $font-body;
+    line-height: 1.5;
+}
+
+h1, h2, h3, .statValue {
+    font-family: $font-roboto-slab;
+    line-height: 1.2;
+}
+
+h1 { font-size: 1.5rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.1rem; }
+
+.statValue {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+a {
+    color: $color-link;
+}
+
+.hint,
+.emptyState {
+    color: $color-text-muted;
+    font-size: 0.9rem;
+}

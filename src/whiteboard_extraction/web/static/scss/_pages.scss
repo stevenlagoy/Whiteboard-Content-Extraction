@@ -1,0 +1,187 @@
+// Page-specific layouts: video detail and upload
+
+.videoLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.player,
+.playerMissing {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 0.5rem;
+    background-color: $gray-000;
+}
+
+.player[hidden] {
+    display: none;
+}
+
+.playerMissing {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border: 1px dashed $gray-040;
+    background-color: $gray-010;
+    color: $color-text-muted;
+    text-align: center;
+}
+
+.videoDetails {
+    padding: 1rem;
+    border: 1px solid $color-border-soft;
+    border-radius: 0.75rem;
+    background-color: $gray-010;
+
+    h2 {
+        margin: 0 0 0.5rem;
+    }
+
+    dl {
+        margin: 0;
+    }
+
+    dl>div {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.4rem 0;
+        border-bottom: 1px solid $color-border-soft;
+    }
+
+    dt {
+        color: $color-text-muted;
+    }
+
+    dd {
+        margin: 0;
+        text-align: right;
+        overflow-wrap: anywhere;
+    }
+
+    .detail {
+        display: block;
+        color: $color-text-muted;
+        font-size: 0.85rem;
+    }
+}
+
+.detailForm {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin-top: 1rem;
+
+    input,
+    select {
+        width: 100%;
+    }
+}
+
+.ocrList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+}
+
+.ocrBlock {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background-color: $gray-010;
+
+    textarea {
+        width: 100%;
+        resize: vertical;
+    }
+
+    &--new {
+        border: 1px dashed $gray-040;
+        background: none;
+    }
+}
+
+.ocrMeta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+
+    label {
+        margin: 0;
+    }
+}
+
+.uploadForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-width: 42rem;
+
+    .step {
+        margin: 0;
+        padding: 1rem 1.25rem;
+        border: 1px solid $color-border;
+        border-radius: 0.75rem;
+    }
+
+    legend {
+        padding: 0 0.5rem;
+        font-weight: 600;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .radio {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+
+        label {
+            margin: 0;
+            color: $color-text;
+        }
+    }
+
+    .button {
+        align-self: flex-start;
+    }
+}
+
+.trimFields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1rem;
+}
+
+.formError {
+    margin: 0;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid hsl(0, 60%, 45%);
+    border-radius: 0.5rem;
+    background-color: hsl(0, 50%, 14%);
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+@media (max-width: 64em) {
+    .videoLayout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

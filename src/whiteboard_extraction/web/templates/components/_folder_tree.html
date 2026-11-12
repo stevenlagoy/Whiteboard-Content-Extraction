@@ -1,0 +1,37 @@
+{% from "components/_icons.html" import icon %}
+
+{% macro video_leaf(video) %}
+<li class="treeItem treeVideo" draggable="true" data-video-id="{{ video.id }}" data-move-url="{{ url_for('actions.move_video', video_id=video.id) }}" data-folder-id="{{ video.folder_id or '' }}" data-drop-before="{{ video.id }}">
+    <a class="treeLabel" href="{{ url_for('pages.video', video_id=video.id) }}" title="{{ video.name }}"{% if active_video_id == video.id %} aria-current="page"{% endif %}>
+        {{ icon('video', 16) }}<span class="treeName">{{ video.name }}</span>
+        {% if video.favorite %}<span class="treeFavorite">{{ icon('star-filled', 12) }}<span class="visually-hidden">Favorite</span></span>{% endif %}
+    </a>
+</li>
+{% endmacro %}
+
+{# Folders nest by calling this macro again for each child. #}
+{% macro folder_node(node) %}
+{% set folder = node.folder %}
+{% set has_contents = node.children or node.videos %}
+<li class="treeItem treeFolder" data-folder-id="{{ folder.id }}">
+    <div class="treeRow" data-drop-folder="{{ folder.id }}">
+        {% if has_contents %}
+        <button type="button" class="treeToggle" aria-expanded="true" aria-controls="children-{{ folder.id }}"
+                aria-label="{{ folder.name }} contents" data-tree-toggle>{{ icon('chevron', 16) }}</button>
+        {% else %}
+        <span class="treeToggle treeToggle--empty"></span>
+        {% endif %}
+        <a class="treeLabel" href="{{ url_for('pages.folder', folder_id=folder.id) }}" title="{{ folder.name }}"{% if active_folder_id == folder.id %} aria-current="page"{% endif %}>
+            {{ icon('folder', 18) }}<span class="treeName">{{ folder.name }}</span>
+        </a>
+        <a class="iconButton treeAction" href="{{ url_for('pages.upload', folder=folder.id) }}"
+           aria-label="Upload a video to {{ folder.name }}" title="Upload here">{{ icon('plus', 16) }}</a>
+    </div>
+    {% if has_contents %}
+    <ul class="treeChildren" id="children-{{ folder.id }}">
+        {% for child in node.children %}{{ folder_node(child) }}{% endfor %}
+        {% for video in node.videos %}{{ video_leaf(video) }}{% endfor %}
+    </ul>
+    {% endif %}
+</li>
+{% endmacro %}

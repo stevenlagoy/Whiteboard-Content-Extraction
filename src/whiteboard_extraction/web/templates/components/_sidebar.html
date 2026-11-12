@@ -1,0 +1,35 @@
+{% from "components/_icons.html" import icon %}
+{% from "components/_folder_tree.html" import folder_node, video_leaf with context %}
+{% from "components/_forms.html" import next_field with context %}
+{% set tree = library_tree() %}
+<div class="brand">
+    <a href="{{ url_for('pages.dashboard') }}">
+        <img src="{{ url_for('static', filename='icon_white.png') }}" alt="">
+        <span>Whiteboard Content Extraction</span>
+    </a>
+</div>
+<nav class="library" aria-label="My files">
+    <div class="libraryHeader" data-drop-folder="">
+        <h2>My files</h2>
+        <details class="popover" data-popover>
+            <summary class="iconButton" aria-label="New folder" title="New folder">{{ icon('folder-plus') }}</summary>
+            <form class="popoverBody" method="post" action="{{ url_for('actions.create_folder') }}" data-enhance>
+                {{ next_field() }}
+                <label for="new-folder-name">Folder name</label>
+                <input id="new-folder-name" name="name" required maxlength="120" autocomplete="off">
+                <button type="submit" class="button primary">Create folder</button>
+            </form>
+        </details>
+        <a class="iconButton" href="{{ url_for('pages.upload') }}" aria-label="Upload a video" title="Upload a video">{{ icon('plus') }}</a>
+    </div>
+    <div class="treeScroll" data-scroll-key="tree">
+        {% if tree.folders or tree.videos %}
+        <ul class="tree">
+            {% for node in tree.folders %}{{ folder_node(node) }}{% endfor %}
+            {% for video in tree.videos %}{{ video_leaf(video) }}{% endfor %}
+        </ul>
+        {% else %}
+        <p class="emptyState">No folders yet. Use the new folder button to make one.</p>
+        {% endif %}
+    </div>
+</nav>

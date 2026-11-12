@@ -1,0 +1,62 @@
+{% from "components/_icons.html" import icon %}
+{% from "components/_status.html" import status_badge %}
+{% from "components/_forms.html" import next_field with context %}
+
+{# One video as one row: favorite, name, uploaded, length, location, status, actions. #}
+{% macro video_row(video, scope, reorderable=False, is_first=False, is_last=False) %}
+{% set status = status_of(video) %}
+<li class="videoRow" draggable="true" data-video-id="{{ video.id }}" data-move-url="{{ url_for('actions.move_video', video_id=video.id) }}" data-folder-id="{{ video.folder_id or '' }}"{% if reorderable %} data-drop-before="{{ video.id }}"{% endif %}>
+    <form class="rowStar" method="post" action="{{ url_for('actions.set_favorite', video_id=video.id) }}" data-enhance>
+        {{ next_field() }}
+        <input type="hidden" name="favorite" value="{{ 'false' if video.favorite else 'true' }}">
+        <button type="submit" class="iconButton starButton" aria-pressed="{{ 'true' if video.favorite else 'false' }}"
+                aria-label="Favorite: {{ video.name }}" title="{{ 'Remove from favorites' if video.favorite else 'Add to favorites' }}"
+                data-focus-key="{{ scope }}:{{ video.id }}:star">
+            {{ icon('star-filled' if video.favorite else 'star') }}
+        </button>
+    </form>
+    <a class="rowName" href="{{ url_for('pages.video', video_id=video.id) }}" title="{{ video.name }}">
+        <img class="thumbnail" src="{{ thumbnail_url(video) }}" alt="" loading="lazy" draggable="false">
+        <span class="rowNameText">{{ video.name }}</span>
+    </a>
+    <div class="rowMeta">
+        <span class="cell cellDate"><span class="visually-hidden">Uploaded: </span><time datetime="{{ video.uploaded_at.isoformat() }}">{{ video.uploaded_at|date }}</time></span>
+        <span class="cell cellLength">{{ icon('clock', 16) }}<span class="visually-hidden">Length: </span>{{ video.clip_seconds|timecode }}</span>
+        <span class="cell cellLocation" title="{{ location_of(video) }}">{{ icon('folder', 16) }}<span class="visually-hidden">Location: </span><span class="ellipsis">{{ location_of(video) }}</span></span>
+        <span class="cell cellStatus">{{ status_badge(status) }}</span>
+    </div>
+    <div class="rowActions">
+        {% if reorderable %}
+        <form method="post" action="{{ url_for('actions.shift_video', video_id=video.id) }}" data-enhance>
+            {{ next_field() }}<input type="hidden" name="direction" value="up">
+            <button type="submit" class="iconButton" aria-label="Move {{ video.name }} up" title="Move up" data-focus-key="{{ scope }}:{{ video.id }}:up"{% if is_first %} disabled{% endif %}>{{ icon('arrow-up', 16) }}</button>
+        </form>
+        <form method="post" action="{{ url_for('actions.shift_video', video_id=video.id) }}" data-enhance>
+            {{ next_field() }}<input type="hidden" name="direction" value="down">
+            <button type="submit" class="iconButton" aria-label="Move {{ video.name }} down" title="Move down" data-focus-key="{{ scope }}:{{ video.id }}:down"{% if is_last %} disabled{% endif %}>{{ icon('arrow-down', 16) }}</button>
+        </form>
+        {% endif %}
+        <form method="post" action="{{ url_for('actions.delete_video', video_id=video.id) }}" data-enhance
+              data-confirm='Delete "{{ video.name }}"? This cannot be undone.'>
+            {{ next_field() }}
+            <button type="submit" class="iconButton danger" aria-label="Delete {{ video.name }}" title="Delete">{{ icon('trash', 18) }}</button>
+        </form>
+    </div>
+</li>
+{% endmacro %}
+
+{# A column-labelled list of rows. Reordering controls and drop targets appear when reorderable. #}
+{% macro video_list(videos, scope, empty_text, reorderable=False, folder_id=None) %}
+{% if videos %}
+<div class="rowHeader{{ ' rowHeader--reorderable' if reorderable }}" aria-hidden="true">
+    <span></span><span>Name</span><span>Uploaded</span><span>Length</span><span>Location</span><span>Status</span><span></span>
+</div>
+<ul class="videoRows{{ ' videoRows--reorderable' if reorderable }}"{% if reorderable %} data-drop-folder="{{ folder_id }}"{% endif %}>
+    {% for video in videos %}
+    {{ video_row(video, scope, reorderable, loop.first, loop.last) }}
+    {% endfor %}
+</ul>
+{% else %}
+<p class="emptyState">{{ empty_text }}</p>
+{% endif %}
+{% endmacro %}
