@@ -262,6 +262,13 @@ def test_recognize_keeps_numeric_confidence_when_present():
     assert blocks[0].confidence == pytest.approx(0.9)
 
 
+@pytest.mark.parametrize("confidence", ["95", "-0.2", "NaN", "Infinity", "true", '"high"'])
+def test_recognize_drops_confidence_outside_zero_to_one(confidence):
+    reply = '[{"text": "E = mc^2", "kind": "equation", "confidence": %s}]' % confidence
+    blocks = MultimodalLLMRecognizer("", client=FakeClient(reply)).recognize(0.0, board())
+    assert blocks[0].confidence is None
+
+
 def test_recognize_concatenates_multiple_text_blocks():
     content = [
         SimpleNamespace(type="thinking", thinking="..."),
