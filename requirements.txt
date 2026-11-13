@@ -6,6 +6,11 @@ opencv-python
 opencv-python-headless
 pandas
 pillow
+cnocr==2.3.3
+cnstd==1.2.8
+pix2text==1.1.7
+rapidocr==3.9.2
+hf_xet
 pytesseract
 pytest
 python-docx
