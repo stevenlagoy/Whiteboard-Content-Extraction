@@ -1,0 +1,6 @@
+filename,timestamp_seconds,x,y,width,height,image_width,image_height
+frame_0000_00-00-000.png,0.0,,,,,640,360
+frame_0001_00-10-000.png,10.0,,,,,640,360
+frame_0002_00-20-000.png,20.0,,,,,640,360
+frame_0003_00-30-000.png,30.0,,,,,640,360
+frame_0004_00-40-000.png,40.0,,,,,640,360
