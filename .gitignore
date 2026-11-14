@@ -2,6 +2,10 @@
 __pycache__/
 *.py[codz]
 *$py.class
+# Raw datasets
+data/raw/ICDAR/**
+data/raw/AccessMath/**
+.gitignore
 
 # C extensions
 *.so
