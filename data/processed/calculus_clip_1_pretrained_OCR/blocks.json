@@ -1,0 +1,194 @@
+[
+  {
+    "filename": "frame_0000_00-00-000.png",
+    "timestamp_seconds": 0.0,
+    "blocks": [
+      {
+        "text": "SIHLUICS",
+        "kind": "prose",
+        "timestamp": 0.0,
+        "confidence": 0.61091
+      },
+      {
+        "text": "\\frac{5} {2}",
+        "kind": "equation",
+        "timestamp": 0.0,
+        "confidence": 0.9665011167526245
+      }
+    ]
+  },
+  {
+    "filename": "frame_0001_00-10-000.png",
+    "timestamp_seconds": 10.0,
+    "blocks": [
+      {
+        "text": "\\textcircled{E}=2",
+        "kind": "equation",
+        "timestamp": 10.0,
+        "confidence": 0.6170724630355835
+      }
+    ]
+  },
+  {
+    "filename": "frame_0002_00-20-000.png",
+    "timestamp_seconds": 20.0,
+    "blocks": [
+      {
+        "text": "O.1-L=nES",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.65362
+      },
+      {
+        "text": "S_{L O P E}=\\frac{R=S E} {R_{1} \\sim}=\\frac{y_{2}-y_{1}} {x_{2}-x_{1}}",
+        "kind": "equation",
+        "timestamp": 20.0,
+        "confidence": 0.9275900721549988
+      },
+      {
+        "text": "SLOPE",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.96622
+      },
+      {
+        "text": "m=Y-Y",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.84476
+      },
+      {
+        "text": "X-x,",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.69861
+      },
+      {
+        "text": "V",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.38039
+      },
+      {
+        "text": "ATZONSi",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.70985
+      }
+    ]
+  },
+  {
+    "filename": "frame_0003_00-30-000.png",
+    "timestamp_seconds": 30.0,
+    "blocks": [
+      {
+        "text": "OI-L=nES",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.63577
+      },
+      {
+        "text": "S_{L O P E}=\\frac{R=S E} {R_{1} \\sim}=\\frac{y_{2}-y_{1}} {x_{2}-x_{1}}",
+        "kind": "equation",
+        "timestamp": 30.0,
+        "confidence": 0.9102264046669006
+      },
+      {
+        "text": "SLOPE",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.91836
+      },
+      {
+        "text": "( x_{2} , y_{2} )",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.9944340586662292
+      },
+      {
+        "text": "m=\\frac{y_{2}-y_{1}} {x_{2}-x_{1}}",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.9996294379234314
+      },
+      {
+        "text": "-Y",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.87263
+      },
+      {
+        "text": "EQuhTZoNSi",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.75588
+      },
+      {
+        "text": "m=y_{2}-y_{1}",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.9956234097480774
+      }
+    ]
+  },
+  {
+    "filename": "frame_0004_00-40-000.png",
+    "timestamp_seconds": 40.0,
+    "blocks": [
+      {
+        "text": "OI-L=nES",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.60234
+      },
+      {
+        "text": "S_{L O P E}=\\frac{R=S E} {R_{1} \\cup N}=\\frac{y_{2}-y_{1}} {x_{2}-x_{1}}",
+        "kind": "equation",
+        "timestamp": 40.0,
+        "confidence": 0.8974934816360474
+      },
+      {
+        "text": "SLOPE",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.90981
+      },
+      {
+        "text": "( x_{2} , y_{2} )",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.9941049218177795
+      },
+      {
+        "text": "m=\\frac{y_{2}-y_{1}} {x_{2}-x_{1}}",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.9996373653411865
+      },
+      {
+        "text": "Quh7ZoNsi",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.65529
+      },
+      {
+        "text": "X-x",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.74289
+      },
+      {
+        "text": "-y",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.43515
+      },
+      {
+        "text": "X",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.28204
+      }
+    ]
+  }
+]

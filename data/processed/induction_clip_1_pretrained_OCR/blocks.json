@@ -1,0 +1,422 @@
+[
+  {
+    "filename": "frame_0000_00-00-000.png",
+    "timestamp_seconds": 0.0,
+    "blocks": [
+      {
+        "text": "S ( n )=\\mathrm{s u u c f ~ a u l p o s i t i v e ~ i n H e g e i s ~ i n c l u d i u i n g ~ n}",
+        "kind": "equation",
+        "timestamp": 0.0,
+        "confidence": 0.8175897598266602
+      },
+      {
+        "text": "S ( 4 )=1+2+3+4=1 0",
+        "kind": "equation",
+        "timestamp": 0.0,
+        "confidence": 0.9916417598724365
+      },
+      {
+        "text": "S(3)=1+2+3=6",
+        "kind": "prose",
+        "timestamp": 0.0,
+        "confidence": 0.89744
+      },
+      {
+        "text": "S(n)=n(g+0",
+        "kind": "prose",
+        "timestamp": 0.0,
+        "confidence": 0.78539
+      },
+      {
+        "text": "\\angle n d u c h \\textcircled{m}",
+        "kind": "equation",
+        "timestamp": 0.0,
+        "confidence": 0.7724320292472839
+      },
+      {
+        "text": "s(). 1",
+        "kind": "prose",
+        "timestamp": 0.0,
+        "confidence": 0.60363
+      },
+      {
+        "text": "vI) Base case K Prove (n1",
+        "kind": "prose",
+        "timestamp": 0.0,
+        "confidence": 0.77297
+      },
+      {
+        "text": "S()",
+        "kind": "prose",
+        "timestamp": 0.0,
+        "confidence": 0.87147
+      },
+      {
+        "text": "2) Iudwuctiout assumu jor",
+        "kind": "prose",
+        "timestamp": 0.0,
+        "confidence": 0.82955
+      },
+      {
+        "text": "V",
+        "kind": "prose",
+        "timestamp": 0.0,
+        "confidence": 0.25161
+      },
+      {
+        "text": "A s s u m e f m e f o r k^{\\frac{1} {2}}",
+        "kind": "equation",
+        "timestamp": 0.0,
+        "confidence": 0.9198719263076782
+      },
+      {
+        "text": "S(K+1)",
+        "kind": "prose",
+        "timestamp": 0.0,
+        "confidence": 0.88479
+      }
+    ]
+  },
+  {
+    "filename": "frame_0001_00-10-000.png",
+    "timestamp_seconds": 10.0,
+    "blocks": [
+      {
+        "text": "S ( n )=\\mathrm{s u u c f ~ a u l p o s i t i v e ~ i n H e g e i s ~ i n c l u d i u j ~ n}",
+        "kind": "equation",
+        "timestamp": 10.0,
+        "confidence": 0.835819661617279
+      },
+      {
+        "text": "1",
+        "kind": "prose",
+        "timestamp": 10.0,
+        "confidence": 0.19474
+      },
+      {
+        "text": "S ( 4 )=1+2+3+4=1 0",
+        "kind": "equation",
+        "timestamp": 10.0,
+        "confidence": 0.9931511878967285
+      },
+      {
+        "text": "S(3)=1+2+3=6",
+        "kind": "prose",
+        "timestamp": 10.0,
+        "confidence": 0.89242
+      },
+      {
+        "text": "S(n)=n(n+0)",
+        "kind": "prose",
+        "timestamp": 10.0,
+        "confidence": 0.79986
+      },
+      {
+        "text": "\\angle n d u c h \\textcircled{m}",
+        "kind": "equation",
+        "timestamp": 10.0,
+        "confidence": 0.8054603338241577
+      },
+      {
+        "text": "1",
+        "kind": "prose",
+        "timestamp": 10.0,
+        "confidence": 0.26594
+      },
+      {
+        "text": "vI) Base case K Prove (n1",
+        "kind": "prose",
+        "timestamp": 10.0,
+        "confidence": 0.77852
+      },
+      {
+        "text": "S()",
+        "kind": "prose",
+        "timestamp": 10.0,
+        "confidence": 0.9018
+      },
+      {
+        "text": "2) Iuduchiou assume jor",
+        "kind": "prose",
+        "timestamp": 10.0,
+        "confidence": 0.87685
+      },
+      {
+        "text": "s(i)=1 :",
+        "kind": "prose",
+        "timestamp": 10.0,
+        "confidence": 0.71418
+      },
+      {
+        "text": "4",
+        "kind": "prose",
+        "timestamp": 10.0,
+        "confidence": 0.44554
+      },
+      {
+        "text": "S(K+1)",
+        "kind": "prose",
+        "timestamp": 10.0,
+        "confidence": 0.8952
+      },
+      {
+        "text": "\\begin{matrix} A_{\\mathrm{s s u m e}}+n u e f o r k \\\\ S ( k )=k ( k+1 ) \\end{matrix}",
+        "kind": "equation",
+        "timestamp": 10.0,
+        "confidence": 0.9045939445495605
+      }
+    ]
+  },
+  {
+    "filename": "frame_0002_00-20-000.png",
+    "timestamp_seconds": 20.0,
+    "blocks": [
+      {
+        "text": "S ( n )=\\mathrm{s u m ~ o f ~ a u l p o s i t i v e ~ i n H e g e i s ~ i n c l u d i u i n g ~ n}",
+        "kind": "equation",
+        "timestamp": 20.0,
+        "confidence": 0.8228911757469177
+      },
+      {
+        "text": "1",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.19605
+      },
+      {
+        "text": "S ( 4 )=1+2+3+4=1 0",
+        "kind": "equation",
+        "timestamp": 20.0,
+        "confidence": 0.9935595393180847
+      },
+      {
+        "text": "S(3)=1+2+3=6",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.89409
+      },
+      {
+        "text": "S(n)=n(n+0)",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.79379
+      },
+      {
+        "text": "\\angle n d u c h \\textcircled{m}",
+        "kind": "equation",
+        "timestamp": 20.0,
+        "confidence": 0.8048595190048218
+      },
+      {
+        "text": "1",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.24069
+      },
+      {
+        "text": "vi)",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.47615
+      },
+      {
+        "text": "K Prowe {a 1",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.60398
+      },
+      {
+        "text": "B a S e c a \\Delta e",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.9069242477416992
+      },
+      {
+        "text": "S()",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.90736
+      },
+      {
+        "text": "2) Iudmucthout assume jor",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.77453
+      },
+      {
+        "text": "s(i)=1 :",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.71703
+      },
+      {
+        "text": "V",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.33216
+      },
+      {
+        "text": "S(K+1)",
+        "kind": "prose",
+        "timestamp": 20.0,
+        "confidence": 0.91198
+      },
+      {
+        "text": "A s s u m e h n u e f o r k :",
+        "kind": "equation",
+        "timestamp": 20.0,
+        "confidence": 0.9257675409317017
+      },
+      {
+        "text": "S ( k )=\\frac{k ( k+1 )} {2}",
+        "kind": "equation",
+        "timestamp": 20.0,
+        "confidence": 0.9992249608039856
+      }
+    ]
+  },
+  {
+    "filename": "frame_0003_00-30-000.png",
+    "timestamp_seconds": 30.0,
+    "blocks": [
+      {
+        "text": "S(3)=1+",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.75865
+      },
+      {
+        "text": "S(n)=n(n+1)",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.81221
+      },
+      {
+        "text": "I_{n} d u c h o w",
+        "kind": "equation",
+        "timestamp": 30.0,
+        "confidence": 0.8466141819953918
+      },
+      {
+        "text": "\\begin{array} {c} {{\\mathrm{B a s e c o s e} \\; k e^{\\mathrm{p r o v e f o r ~ 1}}}} \\\\ {{\\displaystyle I u d u c f i o u c e \\in\\begin{array} {c} {{\\mathrm{a s s u m e f o r}}} \\\\ {{\\displaystyle\\frac{y} {y}}} \\\\ \\end{array}}} \\\\ \\end{array} S ( b )",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.8591029644012451
+      },
+      {
+        "text": "VI)",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.51666
+      },
+      {
+        "text": "LCV",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.44266
+      },
+      {
+        "text": "2",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.84664
+      },
+      {
+        "text": "S(1):1",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.68927
+      },
+      {
+        "text": "A s s u m e h n u e f o T k :",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.905541718006134
+      },
+      {
+        "text": "S ( k )=\\frac{k ( k+1 )} {2}",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.9989941716194153
+      },
+      {
+        "text": "2",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.9376145601272583
+      },
+      {
+        "text": "S(",
+        "kind": "prose",
+        "timestamp": 30.0,
+        "confidence": 0.81252
+      }
+    ]
+  },
+  {
+    "filename": "frame_0004_00-40-000.png",
+    "timestamp_seconds": 40.0,
+    "blocks": [
+      {
+        "text": "S(3)=1+",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.75483
+      },
+      {
+        "text": "\\begin{matrix} S ( n )=\\frac{n ( n+1 )} {2} \\\\ S ( 1 )=1=\\frac{1 ( n+1 )} {2} \\end{matrix}",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.9729847311973572
+      },
+      {
+        "text": "I_{n} d u c h o w",
+        "kind": "equation",
+        "timestamp": 40.0,
+        "confidence": 0.842579185962677
+      },
+      {
+        "text": "vI",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.56023
+      },
+      {
+        "text": "\\begin{array} {c} {{\\mathrm{B a s e c c o s e ~ i c . p r o v e ~ f o r ~ I}}} \\\\ {{\\displaystyle{\\cal I}_{u d u c h i o u ~} \\in\\begin{array} {c} {{\\mathrm{a s s u m e ~ f o r}}} \\\\ {{\\displaystyle{\\frac{y} {y}}}} \\\\ \\end{array} ~ f o r S ( \\mathrm{b} )}} \\\\ {{\\displaystyle{\\cal I} ( \\mathrm{k+1} )}} \\\\ \\end{array}",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.8811959624290466
+      },
+      {
+        "text": "2",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.71337
+      },
+      {
+        "text": "A s s u m e f r u e f o r k",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.9026241302490234
+      },
+      {
+        "text": "S ( k )=\\frac{k ( k+1 )} {2}",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.9985789060592651
+      },
+      {
+        "text": "2",
+        "kind": "prose",
+        "timestamp": 40.0,
+        "confidence": 0.937590479850769
+      },
+      {
+        "text": "S ( k+1 )=1+2+3+\\cdots+k .",
+        "kind": "equation",
+        "timestamp": 40.0,
+        "confidence": 0.9516317248344421
+      }
+    ]
+  }
+]
