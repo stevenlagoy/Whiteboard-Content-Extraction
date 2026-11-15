@@ -9,9 +9,7 @@ import time
 from pathlib import Path
 
 import cv2
-from scipy import stats
 
-from src.whiteboard_extraction.video import keyframes
 from whiteboard_extraction.data.datasets import PROCESSED_DIR
 from whiteboard_extraction.utils.visualization import (
     format_timestamp,
@@ -35,7 +33,7 @@ def main() -> None:
 
     def counted():
         for timestamp, frame in sample_frames(args.video, args.interval):
-            stats["sample"] += 1
+            stats["sampled"] += 1
             stats["last_timestamp"] = timestamp
             yield timestamp, frame
 
@@ -63,7 +61,7 @@ def main() -> None:
 
     print(f"{'#':>3}  {'time':>8} change vs previous keyframe")
     for i, (timestamp, frame) in enumerate(keyframes):
-        change = "first frame" if i == 0 else f"{change_fraction(keyframes[i - 1][i], frame):.1%}"
+        change = "first frame" if i == 0 else f"{change_fraction(keyframes[i - 1][1], frame):.1%}"
         print(f"{i + 1:>3}  {format_timestamp(timestamp):>8}  {change}")
 
     print(f"\nSaved to {out_dir}")

@@ -134,7 +134,7 @@ def recognize_frames(rows: list[dict], image_dir: Path, out_dir: Path, recognize
             blocks = recognizer.recognize(float(row["timestamp_seconds"]), image)
             entry["blocks"] = [asdict(block) for block in blocks]
             summary = "; ".join(f"[{b.kind}] {b.text}" for b in blocks) or "(blank)"
-        except RuntimeError as error:
+        except Exception as error:
             entry["error"] = str(error)
             summary = f"ERROR: {str(error)[:160]}"
         print(f"  {row['filename']}: {summary}")
@@ -156,7 +156,7 @@ def read_image_dir(directory: Path, times_csv: Path | None) -> list[dict]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument("video", type=Path, help="lecture video readable by OpenCV")
+    parser.add_argument("video", type=Path, nargs="?", help="lecture video readable by OpenCV (not needed with --images)")
     parser.add_argument("--out", type=Path, default=None, help="output folder (default: data/processed/<video stem>_frames)")
     when = parser.add_mutually_exclusive_group()
     when.add_argument("--manifest", type=Path, help="video-pipeline manifest CSV with timestamp_seconds (and board boxes)")
@@ -175,25 +175,6 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--times", type=Path, help="CSV with filename,timestamp_seconds for --images")
     args = parser.parse_args(argv)
 
-    if not args.video.exists():
-        print(f"video not found: {args.video}", file=sys.stderr)
-        return 2
-    out_dir = args.out or Path("data/processed") / f"{args.video.stem}_frames"
-
-    if args.manifest:
-        specs = read_manifest(args.manifest)
-    elif args.at:
-        specs = [FrameSpec(t) for t in args.at]
-    else:
-        capture = cv2.VideoCapture(str(args.video))
-        fps = capture.get(cv2.CAP_PROP_FPS) or 0.0
-        frames = capture.get(cv2.CAP_PROP_FRAME_COUNT) or 0.0
-        capture.release()
-        specs = every_n_seconds(frames / fps if fps else 0.0, args.every or 10.0)
-    if args.stride > 1:
-        specs = specs[::args.stride]
-    if args.limit:
-        specs = specs[:args.limit]
     if args.images:
         out_dir = args.out or Path("data/processed") / f"{args.images.name}_ocr"
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -203,13 +184,30 @@ def main(argv: list[str] | None = None) -> int:
         if args.limit:
             rows = rows[:args.limit]
         image_dir = args.images
+        print(f"{args.images}: {len(rows)} image(s)")
     else:
-        # existing video checks and extract_frames(...) go here
+        if args.video is None or not args.video.exists():
+            print(f"video not found: {args.video}", file=sys.stderr)
+            return 2
+        out_dir = args.out or Path("data/processed") / f"{args.video.stem}_frames"
+        if args.manifest:
+            specs = read_manifest(args.manifest)
+        elif args.at:
+            specs = [FrameSpec(t) for t in args.at]
+        else:
+            capture = cv2.VideoCapture(str(args.video))
+            fps = capture.get(cv2.CAP_PROP_FPS) or 0.0
+            frames = capture.get(cv2.CAP_PROP_FRAME_COUNT) or 0.0
+            capture.release()
+            specs = every_n_seconds(frames / fps if fps else 0.0, args.every or 10.0)
+        if args.stride > 1:
+            specs = specs[::args.stride]
+        if args.limit:
+            specs = specs[:args.limit]
+        print(f"{args.video.name}: extracting {len(specs)} frame(s) into {out_dir}")
+        rows = extract_frames(args.video, specs, out_dir, args.max_side, tuple(args.box) if args.box else None)
+        print(f"wrote {len(rows)} frame(s) and frames.csv")
         image_dir = out_dir
-
-    print(f"{args.video.name}: extracting {len(specs)} frame(s) into {out_dir}")
-    rows = extract_frames(args.video, specs, out_dir, args.max_side, tuple(args.box) if args.box else None)
-    print(f"wrote {len(rows)} frame(s) and frames.csv")
 
     if args.recognize:
         from whiteboard_extraction.recognition.registry import build_recognizer, recognizer_from_env

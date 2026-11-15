@@ -57,7 +57,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--force", action="store_true", help="let --write-sample overwrite an existing test set")
     backend = parser.add_argument_group("backend options")
-    backend.add_argument("--ocr-engine", default="tesseract", help="engine for the ocr method (default: tesseract)")
+    backend.add_argument("--ocr-engine", default="pix2text", help="engine for the ocr method (default: pix2text)")
     backend.add_argument("--llm-model", default="", help="model name for the llm method")
     backend.add_argument("--cnn-checkpoint", default="", help="checkpoint path for the cnn method")
     return parser
