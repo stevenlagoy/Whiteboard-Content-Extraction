@@ -9,6 +9,18 @@ from whiteboard_extraction.recognition.base import RecognizedBlock
 _EQUATION_TYPES = {"isolated"}
 
 
+def _reading_key(region: dict) -> tuple[float, float]:
+    """(top, left) of a region's box, so output runs top to bottom, then left to right.
+
+    A region without a position sorts last; the sort is stable, so those keep detector order.
+    """
+    position = region.get("position")
+    if position is None:
+        return (float("inf"), float("inf"))
+    points = np.asarray(position, dtype=float).reshape(-1, 2)
+    return (float(points[:, 1].min()), float(points[:, 0].min()))
+
+
 class PretrainedOCRRecognizer:
     """Wraps a pretrained OCR engine (Pix2Text by default)."""
 
@@ -22,18 +34,19 @@ class PretrainedOCRRecognizer:
 
     def recognize(self, timestamp: float, image: np.ndarray) -> list[RecognizedBlock]:
         rgb = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        regions = self._p2t.recognize(rgb, return_text=False)  # check return shape for your installed version
-
+        regions = sorted(self._p2t.recognize(rgb, return_text=False), key=_reading_key)
+        
         blocks = []
         for region in regions:
             text = region["text"].strip()
             if not text:
                 continue
             kind = "equation" if region["type"] in _EQUATION_TYPES else "prose"
+            score = region.get("score")
             blocks.append(RecognizedBlock(
                 text=text,
                 kind=kind,
                 timestamp=timestamp,
-                confidence=float(region.get("score", 0.0)),
+                confidence=float(score) if score is not None else None,
             ))
         return blocks

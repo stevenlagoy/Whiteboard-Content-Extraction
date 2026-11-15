@@ -6,15 +6,18 @@ times (``--at``), or every N seconds (``--every``). A manifest row with a detect
 otherwise the full frame is kept. Frames are downscaled so no side exceeds ``--max-side`` and
 written as PNG next to a ``frames.csv`` manifest.
 
-With ``--recognize`` every frame is also passed to ``MultimodalLLMRecognizer`` (provider, model and
-timeout from the flags or the WCE_LLM_* variables) and the blocks are written to ``blocks.json``.
+With ``--recognize`` every frame is also passed to a recognition backend (``--method ocr``, ``llm`` or
+``cnn``; default from WCE_RECOGNIZER) and the blocks are written to ``blocks.json``. ``--provider``,
+``--model`` and ``--timeout`` apply to the llm method only. With ``--images DIR`` existing board images
+(for example the video pipeline's cleaned crops) are recognized instead of extracting frames.
 A frame that fails is recorded with its error and the run continues.
 
-Examples::
-
+Examples:
     python scripts/extract_board_frames.py clip.mp4 --every 10 --out data/processed/clip_frames
     python scripts/extract_board_frames.py clip.mp4 --manifest board_detection/manifest.csv --limit 5 \\
-        --recognize --provider openai --model qwen3-vl:2b-instruct
+        --recognize --method llm --provider openai --model qwen3-vl:2b-instruct
+    python scripts/extract_board_frames.py --images data/processed/clean_crops --times times.csv \\
+        --recognize --method ocr --out data/processed/clean_crops_ocr
 """
 
 from __future__ import annotations
@@ -42,7 +45,7 @@ class FrameSpec:
 def read_manifest(path: Path) -> list[FrameSpec]:
     """Timestamps (and board boxes where ``detected`` is true) from a video-pipeline manifest CSV."""
     specs: list[FrameSpec] = []
-    with path.open(newline="") as handle:
+    with path.open(newline="", encoding="utf-8-sig") as handle:
         for row in csv.DictReader(handle):
             timestamp = float(row["timestamp_seconds"])
             box = None
@@ -117,7 +120,7 @@ def extract_frames(video: Path, specs: list[FrameSpec], out_dir: Path, max_side:
                          "image_width": image.shape[1], "image_height": image.shape[0]})
     finally:
         capture.release()
-    with (out_dir / "frames.csv").open("w", newline="") as handle:
+    with (out_dir / "frames.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()) if rows else ["filename", "timestamp_seconds"])
         writer.writeheader()
         writer.writerows(rows)
@@ -175,6 +178,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--times", type=Path, help="CSV with filename,timestamp_seconds for --images")
     args = parser.parse_args(argv)
 
+    for stream in (sys.stdout, sys.stderr):  # OCR text can hold characters the Windows console codepage lacks
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
     if args.images:
         out_dir = args.out or Path("data/processed") / f"{args.images.name}_ocr"
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -186,7 +193,9 @@ def main(argv: list[str] | None = None) -> int:
         image_dir = args.images
         print(f"{args.images}: {len(rows)} image(s)")
     else:
-        if args.video is None or not args.video.exists():
+        if args.video is None:
+            parser.error("give a video, or --images DIR to recognize existing board images")
+        if not args.video.exists():
             print(f"video not found: {args.video}", file=sys.stderr)
             return 2
         out_dir = args.out or Path("data/processed") / f"{args.video.stem}_frames"
