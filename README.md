@@ -130,3 +130,17 @@ python scripts/benchmark.py
 ## Status
 
 Core pipeline stages (video sampling, segmentation, recognition backends, reconstruction, export, and the Flask shell) are scaffolded but not yet implemented. See `docs/project-proposal.md` for current requirements and the task list leading up to the midterm review.
+
+## TextBoxes Dependencies
+
+Text detection uses the AccessMath TextBoxes implementation:
+https://github.com/bhargavaurala/accessmath-textboxes
+
+Pretrained ICDAR 2013 weights:
+TextBoxes_icdar13.caffemodel
+
+VGGNet initialization weights:
+VGG_ILSVRC_16_layers_fc_reduced.caffemodel
+
+Model files are stored locally under:
+accessmath-textboxes/models/pretrained/
