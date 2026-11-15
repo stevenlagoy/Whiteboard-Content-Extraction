@@ -23,6 +23,7 @@ dependencies = [
     "matplotlib",
     "pandas",
     "anthropic"
+    "scikit-image",
 #    "flask",
 #    "waitress"
 ]
