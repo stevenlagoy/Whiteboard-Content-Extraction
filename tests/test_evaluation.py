@@ -177,7 +177,7 @@ def test_a_recognizer_runs_through_the_runner_with_images(samples):
 
 
 def test_registry_builds_backends_lazily_and_rejects_unknown_names():
-    assert build_recognizer("ocr").engine == "tesseract"
+    assert build_recognizer("ocr").engine == "pix2text"
     assert build_recognizer("llm", llm_model="m").model == "m"
     with pytest.raises(ValueError, match="Unknown recognizer"):
         build_recognizer("nope")

@@ -80,7 +80,7 @@ def test_recognize_frames_records_blocks_and_errors(video, tmp_path):
                 raise RuntimeError("model spent its reply on reasoning")
             return [RecognizedBlock(text="x = 1", kind="equation", timestamp=timestamp)]
 
-    results = ebf.recognize_frames(rows, out, FlakyRecognizer())
+    results = ebf.recognize_frames(rows, out, out, FlakyRecognizer())
     assert results[0]["blocks"] == [{"text": "x = 1", "kind": "equation", "timestamp": 0.0, "confidence": None}]
     assert "reasoning" in results[1]["error"]
     assert json.loads((out / "blocks.json").read_text()) == results

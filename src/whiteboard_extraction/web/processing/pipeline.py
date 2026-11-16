@@ -33,7 +33,7 @@ class PipelineStages:
         from whiteboard_extraction.reconstruction.document import build_document
         from whiteboard_extraction.video.keyframes import extract_keyframes
         from whiteboard_extraction.video.sampling import sample_frames
-        from whiteboard_extraction.video.segmentation import crop_to_board, detect_board_region
+        from whiteboard_extraction.video.board_detection import crop_to_board, detect_board_region
 
         return cls(sample_frames, detect_board_region, crop_to_board, extract_keyframes, build_document)
 
