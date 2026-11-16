@@ -1,0 +1,7 @@
+{% from "components/_icons.html" import icon %}
+{% for category, message in get_flashed_messages(with_categories=true) %}
+<div class="message message--{{ category }}" role="{{ 'alert' if category == 'error' else 'status' }}">
+    <p>{{ message }}</p>
+    <button type="button" class="iconButton" data-dismiss aria-label="Dismiss message">{{ icon('x', 16) }}</button>
+</div>
+{% endfor %}

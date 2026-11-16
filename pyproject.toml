@@ -23,6 +23,7 @@ dependencies = [
     "matplotlib",
     "pandas",
     "scikit-image",
+    "anthropic"
 #    "flask",
 #    "waitress"
 ]
@@ -39,8 +40,10 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-markers = ["real_video: runs against real footage in data/raw/test_footage (slow)"]
-
+markers = [
+    "real_video: tests that need real lecture footage (skipped in CI)",
+    "real_llm: tests that call the real multimodal LLM API (skipped unless ANTHROPIC_API_KEY is set)",
+]
 
 [tool.setuptools.package-data]
 "whiteboard_extraction.web" = ["templates/*.html", "static/*"]

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "components/_icons.html" import icon %}
+{% from "components/_breadcrumb.html" import breadcrumb %}
+{% from "components/_video_rows.html" import video_list with context %}
+{% from "components/_forms.html" import next_field with context %}
+
+{% block title %}{{ folder.name }}{% endblock %}
+{% block main_attrs %} data-live="swap"{% endblock %}
+
+{% block main %}
+{{ breadcrumb(path) }}
+<header class="pageHeader">
+    <h1>{{ icon('folder', 28) }}<span>{{ folder.name }}</span></h1>
+    <div class="pageActions">
+        <a class="button primary" href="{{ url_for('pages.upload', folder=folder.id) }}">{{ icon('upload') }}<span>Upload here</span></a>
+        <details class="popover" data-popover>
+            <summary class="button">New subfolder</summary>
+            <form class="popoverBody" method="post" action="{{ url_for('actions.create_folder') }}" data-enhance>
+                {{ next_field() }}<input type="hidden" name="parent_id" value="{{ folder.id }}">
+                <label for="subfolder-name">Folder name</label>
+                <input id="subfolder-name" name="name" required maxlength="120" autocomplete="off">
+                <button type="submit" class="button primary">Create folder</button>
+            </form>
+        </details>
+        <details class="popover" data-popover>
+            <summary class="button">Rename</summary>
+            <form class="popoverBody" method="post" action="{{ url_for('actions.rename_folder', folder_id=folder.id) }}">
+                {{ next_field() }}
+                <label for="folder-rename">Folder name</label>
+                <input id="folder-rename" name="name" required maxlength="120" autocomplete="off" value="{{ folder.name }}">
+                <button type="submit" class="button primary">Save name</button>
+            </form>
+        </details>
+        <form method="post" action="{{ url_for('actions.delete_folder', folder_id=folder.id) }}"
+              data-enhance data-confirm='Delete the folder "{{ folder.name }}"?'>
+            {{ next_field() }}
+            <button type="submit" class="button danger">{{ icon('trash', 18) }}<span>Delete folder</span></button>
+        </form>
+    </div>
+</header>
+
+{% if subfolders %}
+<section class="listSection" aria-labelledby="subfolders-heading">
+    <h2 id="subfolders-heading">Folders</h2>
+    <ul class="folderRows">
+        {% for sub in subfolders %}
+        <li><a href="{{ url_for('pages.folder', folder_id=sub.id) }}">{{ icon('folder', 18) }}<span>{{ sub.name }}</span></a></li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+
+<section class="listSection" aria-labelledby="folder-videos-heading">
+    <h2 id="folder-videos-heading">Videos</h2>
+    <p class="hint">Drag a video onto another to reorder it, or onto a folder in the sidebar to move it. The arrow buttons do the same from the keyboard.</p>
+    {{ video_list(videos, 'folder', 'This folder has no videos yet.', reorderable=true, folder_id=folder.id) }}
+</section>
+{% endblock %}

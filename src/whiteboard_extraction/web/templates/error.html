@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block main %}
+<header class="pageHeader"><h1>{{ title }}</h1></header>
+<p>{{ message }}</p>
+<p><a class="button primary" href="{{ url_for('pages.dashboard') }}">Back to the dashboard</a></p>
+{% endblock %}

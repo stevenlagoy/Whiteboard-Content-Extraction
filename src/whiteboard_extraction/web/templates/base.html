@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400..700&display=swap">
+    {% assets "scss_all" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+    {% endassets %}
+    <title>{% block title %}Dashboard{% endblock %} | Whiteboard Content Extraction</title>
+    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+</head>
+<body>
+    <a class="skipLink" href="#main">Skip to main content</a>
+    <div class="appShell">
+        <aside class="sidebar" data-region="sidebar">
+            {% include "components/_sidebar.html" %}
+        </aside>
+        <div class="content">
+            <div class="profileIcon">
+                <img src="{{ url_for('static', filename='placeholder_user.png') }}" alt="">
+            </div>
+            <div class="messages" data-region="messages" role="status" aria-live="polite">
+                {% include "components/_messages.html" %}
+            </div>
+            <main id="main" tabindex="-1" data-region="main"{% block main_attrs %}{% endblock %}>
+                {% block main %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    {% include "components/_dock.html" %}
+</body>
+</html>
