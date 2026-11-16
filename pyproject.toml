@@ -19,6 +19,7 @@ dependencies = [
     "cnocr==2.3.3",
     "cnstd==1.2.8",
     "flask",
+    "flask-assets",
     "hf_xet",
     "matplotlib",
     "numpy",
