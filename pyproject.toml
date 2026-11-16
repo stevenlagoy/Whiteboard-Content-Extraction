@@ -43,6 +43,7 @@ dependencies = [
 dev = [
     "pytest",
     "ruff",
+    "flake8",
 ]
 
 [tool.setuptools.packages.find]
