@@ -21,6 +21,7 @@ dependencies = [
     "flask",
     "flask-assets",
     "hf_xet",
+    "libsass",
     "matplotlib",
     "numpy",
     "opencv-python",
