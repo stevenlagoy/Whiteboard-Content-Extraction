@@ -7,6 +7,7 @@ CS 59300: Application of Deep Learning, Fall 2026
 - Steven LaGoy, lagosm01@pfw.edu
 - Dalton Lybarger, lybads01@pfw.edu
 - Pranav Rao, raops01@pfw.edu
+- Om Singhal, singo01@pfw.edu
 
 ## Overview
 
