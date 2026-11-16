@@ -80,16 +80,16 @@ site into both exporters; the real backends are still stubs on `main` (see the s
    `ENV_SETTINGS` mapping the field to its `WCE_*` variable; `build_recognizer(name, **settings)`
    and `recognizer_from_env` pick it up from there.
 3. It is now available to `build_recognizer` and `WCE_RECOGNIZER`, and through them to the
-   evaluation script's `--method` flag (#14). The web app (PR #39) still carries its own selector
-   in `web/processing/registry.py`; once both merge, that selector should call `build_recognizer`
-   so the registry is the only list of methods.
+   evaluation script's `--method` flag (#14). The web app still carries its own selector
+   in `web/processing/registry.py`; that selector should call `build_recognizer` so the registry
+   is the only list of methods.
 
 ## Status of the methods
 
 | Method | Name | Issue | State |
 |---|---|---|---|
 | Pretrained OCR | `ocr` | #12 | stub, raises `NotImplementedError` |
-| Multimodal LLM | `llm` | #13 | implemented on its feature branch |
+| Multimodal LLM | `llm` | #13 | implemented, see `docs/RECOGNITION-LLM.md` |
 | Custom CNN | `cnn` | #40 | stub, needs a trained checkpoint |
 
 The acceptance criterion "two methods plugged in and running" is met by the LLM method plus

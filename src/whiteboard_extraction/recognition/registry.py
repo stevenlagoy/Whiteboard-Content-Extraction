@@ -33,7 +33,7 @@ ENV_SETTINGS: dict[str, str] = {
 class RecognizerOptions:
     """Settings a method may need. Each backend reads only its own field and ignores the rest."""
 
-    ocr_engine: str = "tesseract"
+    ocr_engine: str = "pix2text"
     llm_model: str = ""
     cnn_checkpoint: str = ""
 

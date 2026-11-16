@@ -7,6 +7,7 @@ CS 59300: Application of Deep Learning, Fall 2026
 - Steven LaGoy, lagosm01@pfw.edu
 - Dalton Lybarger, lybads01@pfw.edu
 - Pranav Rao, raops01@pfw.edu
+- Om Singhal, singo01@pfw.edu
 
 ## Overview
 
@@ -109,6 +110,25 @@ flask run
 
 Visit `http://127.0.0.1:5000` in a browser to upload a video.
 
+## Run the video extraction pipeline
+
+The Feature 7 keyframe selector and Feature 8 board-processing stages are combined in one pipeline. The pipeline samples frames, detects and crops the board in each sampled frame, then selects keyframes by comparing small grayscale board thumbnails (pixel-change threshold plus SSIM). Full-resolution frames are written to disk and reloaded only when selected, limiting memory use for long videos.
+
+```bash
+python -m whiteboard_extraction.video.pipeline data/raw/test_footage/calculus_clip_1.mp4
+```
+
+Useful options:
+
+```bash
+python -m whiteboard_extraction.video.pipeline --help
+python -m whiteboard_extraction.video.pipeline data/raw/test_footage/calculus_clip_1.mp4 --interval 1.5 --threshold 0.02 --quota 20
+```
+
+Use `--skip-occlusion` to avoid downloading/running YOLO while testing sampling, board detection, and enhancement. Use `--skip-inpainting` or `--skip-enhancement` to disable those stages. Results are written beneath `data/processed/` and should not be committed.
+
+**Current reconstruction limitation:** when a person covers writing, the default OpenCV inpainting stage can only estimate pixels from nearby content. Reliable recovery from other video frames requires board alignment and validation that the writing has not changed; that is not yet enabled in this merged version.
+
 ## Run tests
 
 Same command on every platform, once the virtual environment is active:
@@ -123,9 +143,11 @@ Also the same across platforms:
 
 ```bash
 python scripts/train.py
-python scripts/evaluate.py
+python scripts/evaluate.py --write-sample data/processed/eval_sample --method oracle blank
 python scripts/benchmark.py
 ```
+
+`scripts/evaluate.py` scores every recognition backend on one labeled test set and prints a comparison table; see [`docs/EVALUATION.md`](docs/EVALUATION.md) for the test-set format and options.
 
 ## Status
 

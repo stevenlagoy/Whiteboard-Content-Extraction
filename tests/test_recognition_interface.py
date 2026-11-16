@@ -101,7 +101,7 @@ def test_built_in_names():
 
 
 def test_build_recognizer_instantiates_backends_with_their_settings():
-    assert build_recognizer("ocr", ocr_engine="easyocr").engine == "easyocr"
+    assert build_recognizer("ocr", ocr_engine="pix2text").engine == "pix2text"
     assert build_recognizer("llm", llm_model="some-model").model == "some-model"
 
 
@@ -129,7 +129,7 @@ def test_a_new_method_is_one_registry_entry(monkeypatch):
 
 def test_environment_selects_the_method_and_its_settings():
     assert recognizer_from_env({"WCE_RECOGNIZER": "llm", "WCE_LLM_MODEL": "m-1"}).model == "m-1"
-    assert recognizer_from_env({}).engine == "tesseract"  # the default method is ocr
+    assert recognizer_from_env({}).engine == "pix2text"  # the default method is ocr
 
 
 def test_options_from_env_keep_defaults_for_unset_variables():

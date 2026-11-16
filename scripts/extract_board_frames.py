@@ -6,15 +6,18 @@ times (``--at``), or every N seconds (``--every``). A manifest row with a detect
 otherwise the full frame is kept. Frames are downscaled so no side exceeds ``--max-side`` and
 written as PNG next to a ``frames.csv`` manifest.
 
-With ``--recognize`` every frame is also passed to ``MultimodalLLMRecognizer`` (provider, model and
-timeout from the flags or the WCE_LLM_* variables) and the blocks are written to ``blocks.json``.
+With ``--recognize`` every frame is also passed to a recognition backend (``--method ocr``, ``llm`` or
+``cnn``; default from WCE_RECOGNIZER) and the blocks are written to ``blocks.json``. ``--provider``,
+``--model`` and ``--timeout`` apply to the llm method only. With ``--images DIR`` existing board images
+(for example the video pipeline's cleaned crops) are recognized instead of extracting frames.
 A frame that fails is recorded with its error and the run continues.
 
-Examples::
-
+Examples:
     python scripts/extract_board_frames.py clip.mp4 --every 10 --out data/processed/clip_frames
     python scripts/extract_board_frames.py clip.mp4 --manifest board_detection/manifest.csv --limit 5 \\
-        --recognize --provider openai --model qwen3-vl:2b-instruct
+        --recognize --method llm --provider openai --model qwen3-vl:2b-instruct
+    python scripts/extract_board_frames.py --images data/processed/clean_crops --times times.csv \\
+        --recognize --method ocr --out data/processed/clean_crops_ocr
 """
 
 from __future__ import annotations
@@ -42,7 +45,7 @@ class FrameSpec:
 def read_manifest(path: Path) -> list[FrameSpec]:
     """Timestamps (and board boxes where ``detected`` is true) from a video-pipeline manifest CSV."""
     specs: list[FrameSpec] = []
-    with path.open(newline="") as handle:
+    with path.open(newline="", encoding="utf-8-sig") as handle:
         for row in csv.DictReader(handle):
             timestamp = float(row["timestamp_seconds"])
             box = None
@@ -117,36 +120,46 @@ def extract_frames(video: Path, specs: list[FrameSpec], out_dir: Path, max_side:
                          "image_width": image.shape[1], "image_height": image.shape[0]})
     finally:
         capture.release()
-    with (out_dir / "frames.csv").open("w", newline="") as handle:
+    with (out_dir / "frames.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()) if rows else ["filename", "timestamp_seconds"])
         writer.writeheader()
         writer.writerows(rows)
     return rows
 
 
-def recognize_frames(rows: list[dict], out_dir: Path, recognizer) -> list[dict]:
+def recognize_frames(rows: list[dict], image_dir: Path, out_dir: Path, recognizer) -> list[dict]:
     """Run ``recognizer`` on every extracted frame; errors are recorded, not raised."""
     results: list[dict] = []
     for row in rows:
-        image = cv2.imread(str(out_dir / row["filename"]))
+        image = cv2.imread(str(image_dir / row["filename"]))
         entry = {"filename": row["filename"], "timestamp_seconds": row["timestamp_seconds"]}
         try:
             blocks = recognizer.recognize(float(row["timestamp_seconds"]), image)
             entry["blocks"] = [asdict(block) for block in blocks]
             summary = "; ".join(f"[{b.kind}] {b.text}" for b in blocks) or "(blank)"
-        except RuntimeError as error:
+        except Exception as error:
             entry["error"] = str(error)
             summary = f"ERROR: {str(error)[:160]}"
         print(f"  {row['filename']}: {summary}")
         results.append(entry)
-    with (out_dir / "blocks.json").open("w") as handle:
+    with (out_dir / "blocks.json").open("w", newline="", encoding="utf-8") as handle:
         json.dump(results, handle, indent=2, ensure_ascii=False)
     return results
 
 
+def read_image_dir(directory: Path, times_csv: Path | None) -> list[dict]:
+    """Rows for existing board images; timestamps come from a CSV with filename and timestamp_seconds."""
+    times: dict[str, float] = {}
+    if times_csv:
+        with times_csv.open(newline="", encoding="utf-8") as handle:
+            times = {row["filename"]: float(row["timestamp_seconds"]) for row in csv.DictReader(handle)}
+    names = sorted(p.name for p in directory.iterdir() if p.suffix.lower() in {".png", ".jpg", ".jpeg"})
+    return [{"filename": name, "timestamp_seconds": times.get(name, 0.0)} for name in names]
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument("video", type=Path, help="lecture video readable by OpenCV")
+    parser.add_argument("video", type=Path, nargs="?", help="lecture video readable by OpenCV (not needed with --images)")
     parser.add_argument("--out", type=Path, default=None, help="output folder (default: data/processed/<video stem>_frames)")
     when = parser.add_mutually_exclusive_group()
     when.add_argument("--manifest", type=Path, help="video-pipeline manifest CSV with timestamp_seconds (and board boxes)")
@@ -156,43 +169,68 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--stride", type=int, default=1, help="use every Nth timestamp (default 1: all)")
     parser.add_argument("--limit", type=int, default=None, help="use only the first N timestamps, after --stride")
     parser.add_argument("--max-side", type=int, default=640, help="downscale so no side exceeds this (default 640)")
-    parser.add_argument("--recognize", action="store_true", help="run MultimodalLLMRecognizer on each frame")
-    parser.add_argument("--provider", default=None, help="anthropic or openai (default: WCE_LLM_PROVIDER)")
-    parser.add_argument("--model", default="", help="model id (default: WCE_LLM_MODEL or the provider default)")
-    parser.add_argument("--timeout", type=float, default=None, help="seconds per recognition request")
+    parser.add_argument("--recognize", action="store_true", help="run a recognition backend on each frame")
+    parser.add_argument("--method", default=None, help="ocr, llm or cnn (default: WCE_RECOGNIZER, else ocr)")
+    parser.add_argument("--provider", default=None, help="llm only: anthropic or openai (default: WCE_LLM_PROVIDER)")
+    parser.add_argument("--model", default="", help="llm only: model id (default: WCE_LLM_MODEL)")
+    parser.add_argument("--timeout", type=float, default=None, help="llm only: seconds per request")
+    parser.add_argument("--images", type=Path, help="recognize existing board images instead of extracting frames")
+    parser.add_argument("--times", type=Path, help="CSV with filename,timestamp_seconds for --images")
     args = parser.parse_args(argv)
 
-    if not args.video.exists():
-        print(f"video not found: {args.video}", file=sys.stderr)
-        return 2
-    out_dir = args.out or Path("data/processed") / f"{args.video.stem}_frames"
+    for stream in (sys.stdout, sys.stderr):  # OCR text can hold characters the Windows console codepage lacks
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
 
-    if args.manifest:
-        specs = read_manifest(args.manifest)
-    elif args.at:
-        specs = [FrameSpec(t) for t in args.at]
+    if args.images:
+        out_dir = args.out or Path("data/processed") / f"{args.images.name}_ocr"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        rows = read_image_dir(args.images, args.times)
+        if args.stride > 1:
+            rows = rows[::args.stride]
+        if args.limit:
+            rows = rows[:args.limit]
+        image_dir = args.images
+        print(f"{args.images}: {len(rows)} image(s)")
     else:
-        capture = cv2.VideoCapture(str(args.video))
-        fps = capture.get(cv2.CAP_PROP_FPS) or 0.0
-        frames = capture.get(cv2.CAP_PROP_FRAME_COUNT) or 0.0
-        capture.release()
-        specs = every_n_seconds(frames / fps if fps else 0.0, args.every or 10.0)
-    if args.stride > 1:
-        specs = specs[::args.stride]
-    if args.limit:
-        specs = specs[:args.limit]
-
-    print(f"{args.video.name}: extracting {len(specs)} frame(s) into {out_dir}")
-    rows = extract_frames(args.video, specs, out_dir, args.max_side, tuple(args.box) if args.box else None)
-    print(f"wrote {len(rows)} frame(s) and frames.csv")
+        if args.video is None:
+            parser.error("give a video, or --images DIR to recognize existing board images")
+        if not args.video.exists():
+            print(f"video not found: {args.video}", file=sys.stderr)
+            return 2
+        out_dir = args.out or Path("data/processed") / f"{args.video.stem}_frames"
+        if args.manifest:
+            specs = read_manifest(args.manifest)
+        elif args.at:
+            specs = [FrameSpec(t) for t in args.at]
+        else:
+            capture = cv2.VideoCapture(str(args.video))
+            fps = capture.get(cv2.CAP_PROP_FPS) or 0.0
+            frames = capture.get(cv2.CAP_PROP_FRAME_COUNT) or 0.0
+            capture.release()
+            specs = every_n_seconds(frames / fps if fps else 0.0, args.every or 10.0)
+        if args.stride > 1:
+            specs = specs[::args.stride]
+        if args.limit:
+            specs = specs[:args.limit]
+        print(f"{args.video.name}: extracting {len(specs)} frame(s) into {out_dir}")
+        rows = extract_frames(args.video, specs, out_dir, args.max_side, tuple(args.box) if args.box else None)
+        print(f"wrote {len(rows)} frame(s) and frames.csv")
+        image_dir = out_dir
 
     if args.recognize:
-        from whiteboard_extraction.recognition.llm_multimodal import MultimodalLLMRecognizer
+        from whiteboard_extraction.recognition.registry import build_recognizer, recognizer_from_env
 
-        recognizer = MultimodalLLMRecognizer(args.model, provider=args.provider, timeout=args.timeout,
-                                             max_image_side=args.max_side)
-        print(f"recognizing with provider={recognizer.provider} model={recognizer.model}")
-        results = recognize_frames(rows, out_dir, recognizer)
+        if args.method == "llm":
+            from whiteboard_extraction.recognition.llm_multimodal import MultimodalLLMRecognizer
+            recognizer = MultimodalLLMRecognizer(args.model, provider=args.provider, timeout=args.timeout,
+                                                max_image_side=args.max_side)
+        elif args.method:
+            recognizer = build_recognizer(args.method)
+        else:
+            recognizer = recognizer_from_env()
+        print(f"recognizing with {type(recognizer).__name__}")
+        results = recognize_frames(rows, image_dir, out_dir, recognizer)
         failed = sum("error" in entry for entry in results)
         print(f"wrote blocks.json: {len(results) - failed} frame(s) recognized, {failed} failed")
     return 0
