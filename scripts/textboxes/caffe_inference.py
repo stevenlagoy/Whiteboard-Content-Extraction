@@ -1,5 +1,4 @@
 
-import caffe
 import cv2
 import numpy as np
 import argparse
@@ -8,6 +7,13 @@ from pathlib import Path
 
 
 def main():
+    try:
+        import caffe
+    except ModuleNotFoundError as exc:
+        raise RuntimeError(
+            "The Caffe Python bindings are not installed in the active "
+            "Python environment."
+        ) from exc
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--image_path", type=str, required=True, help="relative path to the image you want to detect text from")
