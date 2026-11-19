@@ -246,7 +246,7 @@ app = create_app(
 
 ## Troubleshooting
 
-- **"OpenCV is required to read video files"**: run `pip install opencv-python-headless`.
+- **"OpenCV is required to read video files"**: run `pip install opencv-contrib-python-headless`.
 - **Upload says the file could not be read as a video**: the file is damaged or uses a codec this OpenCV build cannot open; convert it to MP4 (H.264).
 - **Port 5000 is in use**: add `--port 5001` to the `flask` command, or `--listen=127.0.0.1:5001` to `waitress-serve`.
 - **The stylesheet looks stale**: reload the page once; the stylesheet rebuilds when a file in `static/scss/` changes.

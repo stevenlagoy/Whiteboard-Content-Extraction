@@ -9,7 +9,6 @@ waitress
 
 # Reading uploaded videos and the recognition data contract
 numpy
-opencv-python-headless
 
 # Word and PDF export
 python-docx
