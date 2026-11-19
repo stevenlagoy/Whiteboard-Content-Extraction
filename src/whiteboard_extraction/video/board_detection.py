@@ -1,5 +1,4 @@
 """Detect and crop whiteboard/blackboard regions."""
-import caffe
 import cv2
 import numpy as np
 from pathlib import Path
@@ -22,44 +21,38 @@ def detect_textboxes(
     if frame is None or frame.size == 0:
         raise ValueError("Frame is empty.")
 
+    if hasattr(net, "detect"):
+        detections, confidences = net.detect(frame)
+        boxes = []
+        for box, confidence in zip(detections, confidences):
+            if float(confidence) < threshold:
+                continue
+            x, y, width, height = map(int, box)
+            if width > 0 and height > 0:
+                boxes.append((x, y, width, height))
+        return boxes
+
     height, width = frame.shape[:2]
-
-    # Resize frame to the TextBoxes input dimensions
     resized = cv2.resize(frame, (700, 700))
-
-    # Prepare input blob
     blob = resized.astype(np.float32)
     blob -= np.array([104, 117, 123], dtype=np.float32)
     blob = blob.transpose((2, 0, 1))
     blob = np.expand_dims(blob, axis=0)
-
     net.blobs["data"].reshape(*blob.shape)
     net.blobs["data"].data[...] = blob
 
-    # Run inference
-    output = net.forward()
-    detections = output["detection_out"][0, 0]
-
     boxes = []
-
-    for detection in detections:
+    for detection in net.forward()["detection_out"][0, 0]:
         confidence = float(detection[2])
-
         if confidence < threshold:
             continue
-
         xmin, ymin, xmax, ymax = detection[3:7]
-
-        # Convert normalized coordinates to original frame coordinates
         x1 = max(0, int(xmin * width))
         y1 = max(0, int(ymin * height))
         x2 = min(width, int(xmax * width))
         y2 = min(height, int(ymax * height))
-
-        if x2 <= x1 or y2 <= y1:
-            continue
-
-        boxes.append((x1, y1, x2 - x1, y2 - y1))
+        if x2 > x1 and y2 > y1:
+            boxes.append((x1, y1, x2 - x1, y2 - y1))
 
     return boxes
 
@@ -152,18 +145,29 @@ def crop_to_board(
     return frame[y1:y2, x1:x2].copy()
 
 def load_textboxes():
+    import importlib.util
+
     PROJECT_ROOT = Path(__file__).resolve().parents[3]
+    caffe = importlib.util.find_spec("caffe")
+    if caffe is None:
+        raise RuntimeError(
+            "TextBoxes requires the native Caffe Python bindings. "
+            "Run this option in a Caffe-enabled Linux/WSL environment."
+        )
 
-    TEXTBOXES_ROOT = PROJECT_ROOT / "accessmath-textboxes"
+    import caffe as caffe_module
 
-    MODEL =  TEXTBOXES_ROOT/"examples/TextBoxes/deploy.prototxt"
-    WEIGHTS = TEXTBOXES_ROOT/"examples/TextBoxes/TextBoxes_icdar13.caffemodel"
+    textboxes_root = PROJECT_ROOT / "accessmath-textboxes"
+    prototxt = textboxes_root / "examples" / "TextBoxes" / "deploy.prototxt"
+    weights = textboxes_root / "examples" / "TextBoxes" / "TextBoxes_icdar13.caffemodel"
+    if not prototxt.is_file():
+        raise FileNotFoundError(f"TextBoxes prototxt not found: {prototxt}")
+    if not weights.is_file():
+        raise FileNotFoundError(f"TextBoxes weights not found: {weights}")
 
-    # CPU inference
-    caffe.set_mode_cpu()
-
-    return caffe.Net(
-        str(MODEL),
-        str(WEIGHTS),
-        caffe.TEST
+    caffe_module.set_mode_cpu()
+    return caffe_module.Net(
+        str(prototxt),
+        str(weights),
+        caffe_module.TEST,
     )
