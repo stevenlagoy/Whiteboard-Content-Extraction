@@ -109,6 +109,25 @@ flask run
 
 Visit `http://127.0.0.1:5000` in a browser to upload a video.
 
+## Run the video extraction pipeline
+
+The Feature 7 keyframe selector and Feature 8 board-processing stages are combined in one pipeline. The pipeline samples frames, detects and crops the board in each sampled frame, then selects keyframes by comparing small grayscale board thumbnails (pixel-change threshold plus SSIM). Full-resolution frames are written to disk and reloaded only when selected, limiting memory use for long videos.
+
+```bash
+python -m whiteboard_extraction.video.pipeline data/raw/test_footage/calculus_clip_1.mp4
+```
+
+Useful options:
+
+```bash
+python -m whiteboard_extraction.video.pipeline --help
+python -m whiteboard_extraction.video.pipeline data/raw/test_footage/calculus_clip_1.mp4 --interval 1.5 --threshold 0.02 --quota 20
+```
+
+Use `--skip-occlusion` to avoid downloading/running YOLO while testing sampling, board detection, and enhancement. Use `--skip-inpainting` or `--skip-enhancement` to disable those stages. Results are written beneath `data/processed/` and should not be committed.
+
+**Current reconstruction limitation:** when a person covers writing, the default OpenCV inpainting stage can only estimate pixels from nearby content. Reliable recovery from other video frames requires board alignment and validation that the writing has not changed; that is not yet enabled in this merged version.
+
 ## Run tests
 
 Same command on every platform, once the virtual environment is active:
@@ -127,6 +146,52 @@ python scripts/evaluate.py
 python scripts/benchmark.py
 ```
 
-## Status
+## TextBoxes Dependencies
 
-Core pipeline stages (video sampling, segmentation, recognition backends, reconstruction, export, and the Flask shell) are scaffolded but not yet implemented. See `docs/project-proposal.md` for current requirements and the task list leading up to the midterm review.
+Text detection uses the AccessMath TextBoxes implementation:
+https://github.com/bhargavaurala/accessmath-textboxes
+
+Pretrained ICDAR 2013 weights:
+TextBoxes_icdar13.caffemodel
+
+VGGNet initialization weights:
+VGG_ILSVRC_16_layers_fc_reduced.caffemodel
+
+The runtime detector uses OpenCV's Caffe DNN compatibility and does not require a Caffe build or a Linux-specific environment:
+
+```bash
+pip install opencv-contrib-python-headless
+python scripts/download_textboxes_assets.py
+python scripts/detect_textboxes.py --help
+```
+
+Inference assets are stored under `data/models/textboxes/` and are ignored by Git. VGG weights are only needed for retraining; add `--include-vgg` to download them.
+
+Download and verify the pinned ICDAR 2013 mirror with:
+
+```bash
+python scripts/download_icdar2013.py
+```
+
+### Running TextBoxes through the video pipeline
+
+Native Caffe TextBoxes is not available from a normal Windows `pip` environment.
+Use WSL2/Linux with a working Caffe Python build:
+
+```bash
+git clone https://github.com/bhargavaurala/accessmath-textboxes.git
+bash scripts/textboxes/setup_textboxes.sh
+python -m pip install -r requirements.txt
+python -m whiteboard_extraction.video.pipeline data/raw/test_footage/calculus_clip_1.mp4 \
+  --detector textboxes
+```
+
+The `accessmath-textboxes/` checkout must contain:
+
+```text
+accessmath-textboxes/examples/TextBoxes/deploy.prototxt
+accessmath-textboxes/examples/TextBoxes/TextBoxes_icdar13.caffemodel
+```
+
+OpenCV 5.x cannot load the legacy Caffe model; the project pins OpenCV 4.10-4.11,
+but the native Caffe route is required for a reliable Windows/WSL evaluation.

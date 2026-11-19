@@ -1,0 +1,13 @@
+filename,timestamp_seconds,detected,x,y,width,height,error
+keyframe_0000_00-00-00-000,0.0,False,,,,,Board was not detected. Try another model.
+keyframe_0001_00-00-04-000,4.0,False,,,,,Board was not detected. Try another model.
+keyframe_0002_00-00-08-000,8.0,False,,,,,Board was not detected. Try another model.
+keyframe_0003_00-00-10-000,10.0,False,,,,,Board was not detected. Try another model.
+keyframe_0004_00-00-12-000,12.0,False,,,,,Board was not detected. Try another model.
+keyframe_0005_00-00-24-000,24.0,False,,,,,Board was not detected. Try another model.
+keyframe_0006_00-00-30-000,30.0,False,,,,,Board was not detected. Try another model.
+keyframe_0007_00-00-32-000,32.0,False,,,,,Board was not detected. Try another model.
+keyframe_0008_00-00-34-000,34.0,False,,,,,Board was not detected. Try another model.
+keyframe_0009_00-00-38-000,38.0,False,,,,,Board was not detected. Try another model.
+keyframe_0010_00-00-42-000,42.0,False,,,,,Board was not detected. Try another model.
+keyframe_0011_00-00-44-000,44.0,False,,,,,Board was not detected. Try another model.

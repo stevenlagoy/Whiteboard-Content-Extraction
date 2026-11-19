@@ -17,12 +17,13 @@ dependencies = [
     "numpy",
     "torch",
     "torchvision",
-    "opencv-python",
+    "opencv-contrib-python-headless>=4.10,<4.12",
     "pillow",
     "scikit-learn",
     "matplotlib",
     "pandas",
-    "anthropic"
+    "anthropic",
+    "scikit-image",
 #    "flask",
 #    "waitress"
 ]
