@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 CAFFE_ROOT="$PROJECT_ROOT/accessmath-textboxes"
 
 export PYTHONPATH="$CAFFE_ROOT/python${PYTHONPATH:+:$PYTHONPATH}"
