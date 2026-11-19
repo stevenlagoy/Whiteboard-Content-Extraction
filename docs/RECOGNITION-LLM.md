@@ -186,7 +186,7 @@ for block in blocks:
     print(block.kind, block.text)
 ```
 
-Once the issue #14 branch is merged, the same configuration drives the evaluation script:
+The same configuration drives the evaluation script (see `docs/EVALUATION.md`):
 
 ```bash
 WCE_LLM_PROVIDER=openai python scripts/evaluate.py --test-set data/raw/eval_boards --method llm --llm-model qwen3-vl:2b-instruct
@@ -310,8 +310,8 @@ dropped (`collapse_repeats`, on by default), since small models sometimes loop o
 team's calculus clip this removed every repetition loop (five consecutive copies of one formula in
 the worst frame) with no other change. Everything else is strict and raises
 `RuntimeError` with an excerpt of the reply: no JSON array, an element that is not an object, a
-missing `text`, or a `kind` outside the two allowed values. An optional numeric `confidence` is kept
-when the model volunteers one, otherwise `RecognizedBlock.confidence` is `None`.
+missing `text`, or a `kind` outside the two allowed values. An optional `confidence` from 0 to 1 is kept
+when the model volunteers one; anything else is dropped and `RecognizedBlock.confidence` is `None`.
 
 Other failure modes also surface as `RuntimeError`, with the original exception chained: SDK, HTTP
 and network errors (with the server's own message, so Ollama's "model not found" reaches you),

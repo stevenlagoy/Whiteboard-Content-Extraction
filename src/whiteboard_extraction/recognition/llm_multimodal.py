@@ -259,8 +259,8 @@ def _validate_block(index: int, item: Any, reply: str) -> dict[str, Any] | None:
         return None
     block: dict[str, Any] = {"text": text, "kind": kind.strip().lower()}
     confidence = item.get("confidence")
-    if isinstance(confidence, (int, float)) and not isinstance(confidence, bool):
-        block["confidence"] = float(confidence)
+    if isinstance(confidence, (int, float)) and not isinstance(confidence, bool) and 0 <= confidence <= 1:
+        block["confidence"] = float(confidence)  # anything else (a 0-100 score, NaN) is left out
     return block
 
 
