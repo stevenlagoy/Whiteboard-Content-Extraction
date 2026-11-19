@@ -1,7 +1,68 @@
 """Detect and crop whiteboard/blackboard regions."""
-
+import caffe
 import cv2
 import numpy as np
+from pathlib import Path
+
+def detect_textboxes(
+        frame: np.ndarray,
+        net,
+        threshold: float=0.5
+) -> list[tuple[int, int, int, int]]:
+    """
+    Detect text regions in a frame using the TextBoxes model.
+
+    Args:
+        frame: Input frame in OpenCV BGR format.
+        net: Previously initialized Caffe network.
+        threshold: Minimum detection confidence threshold to retain.
+    Returns:
+        List of bounding boxes in (x, y, width, height) format.
+    """
+    if frame is None or frame.size == 0:
+        raise ValueError("Frame is empty.")
+
+    height, width = frame.shape[:2]
+
+    # Resize frame to the TextBoxes input dimensions
+    resized = cv2.resize(frame, (700, 700))
+
+    # Prepare input blob
+    blob = resized.astype(np.float32)
+    blob -= np.array([104, 117, 123], dtype=np.float32)
+    blob = blob.transpose((2, 0, 1))
+    blob = np.expand_dims(blob, axis=0)
+
+    net.blobs["data"].reshape(*blob.shape)
+    net.blobs["data"].data[...] = blob
+
+    # Run inference
+    output = net.forward()
+    detections = output["detection_out"][0, 0]
+
+    boxes = []
+
+    for detection in detections:
+        confidence = float(detection[2])
+
+        if confidence < threshold:
+            continue
+
+        xmin, ymin, xmax, ymax = detection[3:7]
+
+        # Convert normalized coordinates to original frame coordinates
+        x1 = max(0, int(xmin * width))
+        y1 = max(0, int(ymin * height))
+        x2 = min(width, int(xmax * width))
+        y2 = min(height, int(ymax * height))
+
+        if x2 <= x1 or y2 <= y1:
+            continue
+
+        boxes.append((x1, y1, x2 - x1, y2 - y1))
+
+    return boxes
+
 
 def detect_board_region(frame: np.ndarray) -> tuple[int, int, int, int]:
     """Return the (x, y, width, height) bounding box of the board."""
@@ -89,3 +150,20 @@ def crop_to_board(
         raise ValueError("Board bounding box is outside the frame.")
 
     return frame[y1:y2, x1:x2].copy()
+
+def load_textboxes():
+    PROJECT_ROOT = Path(__file__).resolve().parents[3]
+
+    TEXTBOXES_ROOT = PROJECT_ROOT / "accessmath-textboxes"
+
+    MODEL =  TEXTBOXES_ROOT/"examples/TextBoxes/deploy.prototxt"
+    WEIGHTS = TEXTBOXES_ROOT/"examples/TextBoxes/TextBoxes_icdar13.caffemodel"
+
+    # CPU inference
+    caffe.set_mode_cpu()
+
+    return caffe.Net(
+        str(MODEL),
+        str(WEIGHTS),
+        caffe.TEST
+    )

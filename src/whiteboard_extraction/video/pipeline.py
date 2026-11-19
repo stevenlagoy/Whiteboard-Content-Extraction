@@ -12,7 +12,7 @@ from whiteboard_extraction.data.datasets import PROCESSED_DIR
 from whiteboard_extraction.utils.visualization import create_directory_contact_sheet
 from .sampling import sample_frames
 from .keyframes import extract_keyframes
-from .board_detection import detect_board_region, crop_to_board
+from .board_detection import detect_board_region, crop_to_board, detect_textboxes, load_textboxes
 from .enhancement import enhance_board
 
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
@@ -67,6 +67,11 @@ def make_stage_dirs(output_root: Path, video_name: str) -> dict[str, Path]:
         directory.mkdir(parents=True, exist_ok=True)
     return directories
 
+def cv2_detection():
+    pass
+
+def text_boxes_detection():
+    textboxes_net = load_textboxes()
 
 def run_pipeline(
     video_path: Path,
@@ -77,6 +82,7 @@ def run_pipeline(
     skip_occlusion: bool = False,
     skip_inpainting: bool = False,
     skip_enhancement: bool = False,
+    detector: str = "cv2"
 ) -> None:
     """Run the complete pipeline while keeping only small board thumbnails in RAM."""
     video_path = video_path.expanduser().resolve()
@@ -104,6 +110,10 @@ def run_pipeline(
     sample_paths: dict[float, Path] = {}
     board_detection_errors: list[dict] = []
 
+    textboxes_net = None
+    if detector == "textboxes":
+        textboxes_net = load_textboxes()
+
     for sample_index, (timestamp, frame) in enumerate(sample_frames(video_path, interval)):
         sample_name = f"sample_{sample_index:05}_{timestamp_name(timestamp)}.jpg"
         sample_path = directories["sampled_frames"] / sample_name
@@ -118,13 +128,39 @@ def run_pipeline(
         # Detect/crop the board BEFORE comparing frames. This avoids selecting
         # keyframes because the instructor or classroom background moved.
         try:
-            board_box = detect_board_region(frame)
-            board_crop = crop_to_board(frame, board_box)
-            # A fixed proxy size lets crops with slightly different detected
-            # dimensions be compared without retaining full-resolution images.
-            proxy = cv2.resize(board_crop, (320, 180), interpolation=cv2.INTER_AREA)
-            proxy = cv2.cvtColor(proxy, cv2.COLOR_BGR2GRAY)
-            board_proxies.append((timestamp, proxy))
+            if detector == "cv2":
+                board_box = detect_board_region(frame)
+                board_crop = crop_to_board(frame, board_box)
+                # A fixed proxy size lets crops with slightly different detected
+                # dimensions be compared without retaining full-resolution images.
+                proxy = cv2.resize(board_crop, (320, 180), interpolation=cv2.INTER_AREA)
+                proxy = cv2.cvtColor(proxy, cv2.COLOR_BGR2GRAY)
+                board_proxies.append((timestamp, proxy))
+
+            elif detector == "textboxes":
+                boxes = detect_textboxes(frame, textboxes_net)
+
+                if not boxes:
+                    raise ValueError("No text regions detected.")
+
+                x1 = min(box[0] for box in boxes)
+                y1 = min(box[1] for box in boxes)
+                x2 = max(box[0] + box[2] for box in boxes)
+                y2 = max(box[1] + box[3] for box in boxes)
+
+                board_box = (x1, y1, x2 - x1, y2 - y1)
+
+                board_crop = crop_to_board(frame, board_box)
+
+                proxy = cv2.resize(
+                    board_crop,
+                    (320, 180),
+                    interpolation=cv2.INTER_AREA
+                )
+                proxy = cv2.cvtColor(proxy, cv2.COLOR_BGR2GRAY)
+
+                board_proxies.append((timestamp, proxy))
+
         except (ValueError, cv2.error) as error:
             board_detection_errors.append({
                 "filename": sample_name,
@@ -350,7 +386,12 @@ def main() -> None:
         action="store_true",
         help="Skip CLAHE contrast enhancement.",
     )
-
+    parser.add_argument(
+        "--detector",
+        type=str,
+        default="cv2",
+        help="whether to use cv2 or textboxes as the text/equation detection system"
+    )
     args = parser.parse_args()
 
     try:
@@ -363,6 +404,7 @@ def main() -> None:
             skip_occlusion=args.skip_occlusion,
             skip_inpainting=args.skip_inpainting,
             skip_enhancement=args.skip_enhancement,
+            detector=args.detector
         )
     except (FileNotFoundError, ValueError, RuntimeError, OSError) as error:
         parser.exit(1, f"Error: {error}\n")
