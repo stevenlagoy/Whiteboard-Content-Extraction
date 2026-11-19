@@ -17,7 +17,7 @@ dependencies = [
     "numpy",
     "torch",
     "torchvision",
-    "opencv-contrib-python-headless",
+    "opencv-contrib-python-headless>=4.10,<4.12",
     "pillow",
     "scikit-learn",
     "matplotlib",

@@ -2,7 +2,7 @@ anthropic
 flask
 matplotlib
 numpy
-opencv-contrib-python-headless
+opencv-contrib-python-headless>=4.10,<4.12
 pandas
 pillow
 pytesseract
