@@ -172,3 +172,26 @@ Download and verify the pinned ICDAR 2013 mirror with:
 ```bash
 python scripts/download_icdar2013.py
 ```
+
+### Running TextBoxes through the video pipeline
+
+Native Caffe TextBoxes is not available from a normal Windows `pip` environment.
+Use WSL2/Linux with a working Caffe Python build:
+
+```bash
+git clone https://github.com/bhargavaurala/accessmath-textboxes.git
+bash scripts/textboxes/setup_textboxes.sh
+python -m pip install -r requirements.txt
+python -m whiteboard_extraction.video.pipeline data/raw/test_footage/calculus_clip_1.mp4 \
+  --detector textboxes
+```
+
+The `accessmath-textboxes/` checkout must contain:
+
+```text
+accessmath-textboxes/examples/TextBoxes/deploy.prototxt
+accessmath-textboxes/examples/TextBoxes/TextBoxes_icdar13.caffemodel
+```
+
+OpenCV 5.x cannot load the legacy Caffe model; the project pins OpenCV 4.10-4.11,
+but the native Caffe route is required for a reliable Windows/WSL evaluation.
