@@ -20,7 +20,8 @@ python scripts/evaluate.py --write-sample data/processed/eval_sample --method or
 ```
 
 `oracle` answers with the labels (every score should be perfect) and `blank` answers with nothing
-(every score should be at its worst). Then score the real backends on a labeled test set:
+(every score in the main table should be at its worst). Then score the real backends on a labeled
+test set:
 
 ```bash
 python scripts/evaluate.py --test-set data/raw/eval_boards --method ocr llm cnn --json results/eval.json
@@ -29,15 +30,16 @@ python scripts/evaluate.py --test-set data/raw/eval_boards --method ocr llm cnn 
 A backend that is not implemented yet, or that cannot start (no API key, missing checkpoint), gets
 an `n/a` row and a one-line reason under the table instead of stopping the run. A backend that
 raises on one image has that image scored as if it returned nothing, and the reason is listed
-under the table. Saved JSON runs can
+under the table. An image that can no longer be read is left out of the scores and named under
+the table. Saved JSON runs can
 be combined into one table later, which is how results from different machines are compared:
 
 ```bash
 python scripts/evaluate.py --load results/ocr.json results/llm.json results/cnn.json
 ```
 
-Run `python scripts/evaluate.py --help` for every option, including `--casefold`, `--llm-model`,
-`--cnn-checkpoint`, and `--ocr-engine`.
+Run `python scripts/evaluate.py --help` for every option, including `--casefold`,
+`--min-similarity`, `--no-warmup`, `--llm-model`, `--cnn-checkpoint`, and `--ocr-engine`.
 
 ## Test set format
 
@@ -52,9 +54,18 @@ object per line:
 
 | Field | Meaning |
 |---|---|
-| `image` | Path relative to the folder. A cropped board region, as the video pipeline hands it to a recognizer. Anything OpenCV can read. |
+| `image` | Path relative to the folder. A cropped board region, as the video pipeline hands it to a recognizer. Anything OpenCV can read; an image it cannot read is an error when the test set loads. |
 | `timestamp` | Seconds into the source video (optional, default 0). Passed to the recognizer and attached to its blocks. |
-| `blocks` | What is written on the board, top to bottom. Each block has `text` and a `kind` of `prose` or `equation` (equations as LaTeX). An empty list labels a blank board. |
+| `blocks` | What is written on the board, top to bottom. Each block needs a `text` and a `kind` of `prose` or `equation` (equations as LaTeX). An empty list labels a blank board. |
+
+A block is one written line or expression, and it has one kind. A sentence that wraps across lines
+on the board is one prose block, each line of a derivation is its own equation block, and a
+heading or a label is a block of its own. A line that contains mathematics is an equation even
+when a few words accompany it. Methods are expected to return blocks of the same size. WER and
+CER read the board as one text, so correctly read text costs nothing there however its lines of
+one kind were split or merged, down to one block per word; that shows only in the block-level
+numbers (exact match and the kind scores). A block that mixes kinds still costs little in CER,
+and more in WER because the words of an equation are tokens.
 
 To build one from real footage, run the video pipeline to get cropped keyframes, copy the ones
 to label into the folder, and write their text by hand. Keep the manifest in the folder next to
@@ -67,35 +78,76 @@ that already holds a test set unless `--force` is given.
 
 | Column | Definition |
 |---|---|
+| Samples | Images the method was scored on. An image that could not be read is left out; an image the method raised on is counted and scored as if it returned nothing. |
 | Blocks ref/pred | Labeled blocks in the test set / blocks the method returned. |
 | Accuracy | Share of aligned block pairs whose kind (prose or equation) is right. A missed or invented block counts as wrong. |
-| Precision, Recall, F1 | Macro-averaged over the two kinds. A missed block is a false negative for its kind; an invented block is a false positive for the kind it was given. |
-| WER | Word error rate: word-level edit distance between each board's text and the method's text, summed over the test set and divided by the total number of reference words. Can exceed 1.0 when the method invents text. |
-| CER | Character error rate, computed the same way on characters. More forgiving to small OCR slips, and the better number for LaTeX, whose tokens are not space-separated. |
-| Exact match | Share of labeled blocks whose aligned prediction has exactly the same text (after collapsing whitespace). |
-| Time (s) | Wall-clock time spent running the method over the whole set, reading the images included and scoring excluded (user story 12). |
+| Precision, Recall, F1 | Macro-averaged over the kinds present. A missed block is a false negative for its kind; an invented block is a false positive for the kind it was given. |
+| WER | Word error rate. Each board is read as one text, blocks in order, and compared with what the method read; the word-level edit distances are summed over the test set and divided by the total number of reference words. Can exceed 1.0 when the method invents text. |
+| CER | Character error rate, computed the same way on characters. More forgiving to small OCR slips. |
+| Exact match | Share of labeled blocks whose aligned prediction has exactly the same text after normalization. |
+| s/image | Mean time the method spent on one image, over the images it answered. Only the `recognize` call is timed: decoding the image, building the method and scoring are left out, and one untimed warm-up call keeps model loading out as well (`--no-warmup` skips it, for a method that is billed per call). Total pipeline time (user story 12) is a separate measurement for `scripts/benchmark.py`, which is still empty. |
+
+How text is compared:
+
+* Whitespace runs are collapsed and Unicode is normalized (NFC) before anything is compared.
+* Spacing never counts inside an equation. An equation is compared without the whitespace that
+  means nothing in LaTeX, so `\frac{5} {2}` and `\frac{5}{2}` are the same text. The one space
+  that is kept is the one LaTeX needs to end a command before a letter: `\sin x` and `\sinx` are
+  different. The "words" of an equation for WER are LaTeX tokens: a command such as `\frac`, or
+  any other single symbol.
+* Reading is kept apart from labeling. Block boundaries and the kinds a method assigns are set
+  aside: the board's label text and the method's text are lined up once, character by character,
+  and each predicted block is read as the kind of the label most of its characters landed on.
+  So WER and CER depend neither on the kinds a method assigns nor on `--min-similarity`: a
+  formula that was read correctly but called prose costs nothing here, and the wrong label
+  counts in the kind scores.
+* Edit distance is Levenshtein (insert, delete, substitute), the definition WER and CER are
+  normally reported with.
+
+A second table, By kind, scores equations and prose separately (user story 7), one row per method
+and kind:
+
+| Column | Definition |
+|---|---|
+| Blocks | Labeled blocks of this kind. |
+| Accuracy | Share of all aligned pairs for which the method was right about whether the block is of this kind. A missed block of the other kind counts as right here, so `blank` scores the share of blocks of the other kind, not 0. |
+| Precision, Recall, F1 | The same scores as in the main table, for this kind alone; the main table holds their mean over the kinds present. |
+| WER, CER | The equations (or the prose) of each board read as one text and compared with what the method read of that kind. |
+| Exact match | Share of this kind's labeled blocks read exactly. |
+
+A kind that is neither in the labels nor in the method's output has no row, and a rate shows `n/a`
+when there is no label text of that kind to divide by. The two rows need not add up to the main
+table: a block that mixes both kinds is missing from one row and extra in the other, while the
+main table still reads it in place.
 
 `--casefold` lowercases labels and predictions before alignment and before WER, CER and exact match
-are computed, so only compare runs made with the same setting; the saved JSON records it. Blocks a
-method returns with empty text are ignored, matching the rule that labels cannot be empty.
+are computed, and `--min-similarity` changes which blocks pair (see below) and with that the kind
+scores and exact match. Only compare runs made with the same settings; the saved JSON records both
+and the report shows them. Blocks a method returns with empty text are ignored, matching the rule
+that labels cannot be empty.
 
-Below the table, one confusion matrix per method shows how reference kinds (rows) were predicted
+Below the tables, one confusion matrix per method shows how reference kinds (rows) were predicted
 (columns); the `none` row and column hold invented and missed blocks respectively.
 
 Blocks are aligned in order with standard sequence alignment: a predicted block pairs with a
-labeled block only when at least half of its characters agree, so a split, merged, missed, or
-invented block shows up as a miss or an extra instead of shifting every later pair.
+labeled block only when their text similarity reaches `--min-similarity` (default 0.5, so at least
+half of the characters agree), so a split, merged, missed, or invented block shows up as a miss or
+an extra instead of shifting every later pair. Lower the threshold for a method that reads
+handwriting poorly, where correct blocks would otherwise fail to pair.
 
 The saved JSON holds the same metrics plus every reference and predicted block, so individual
-mistakes can be inspected after a run.
+mistakes can be inspected after a run. `--load` scores a saved run again from those blocks, so a
+file written by an older version of the script shows numbers under the current rules. Its time
+per image shows `n/a` when the file was saved before only the `recognize` call was timed.
 
 ## Adding a method
 
 Any object with `recognize(timestamp, image) -> list[RecognizedBlock]` (the `Recognizer`
 protocol in `recognition/base.py`) can be scored. Give it a name in
 `recognition/registry.py` and it becomes available to `--method`. Inside Python,
-`whiteboard_extraction.evaluation.evaluate_predictor` scores any function from a `Sample` to
-blocks, which is how the baselines and the tests work.
+`whiteboard_extraction.evaluation.evaluate_recognizer` scores a recognizer object and
+`evaluate_predictor` scores any function from a `Sample` to blocks, which is how the baselines
+work.
 
 ## Output format
 
@@ -115,11 +167,15 @@ Each method is given a board with printed text and has to return at least one bl
 that is still a stub is skipped until it is implemented. A method that needs a service, an engine
 or a model file gets an entry in that file's `OFFLINE_SETUP` so the test runs without it.
 
+The checker cannot see how a method divides a board into blocks. The expected size is the one the
+labels use: one block per written line or expression.
+
 ## Limits
 
-* Text metrics tokenize on whitespace, so `x^2+1` and `x^2 + 1` count as different words.
-  Use CER for equations, or normalize spacing in both labels and outputs.
-* Edit distances are computed in pure Python; boards with thousands of characters take a few
-  seconds each.
+* Two ways of writing the same formula still differ: `\frac12` and `\frac{1}{2}` are different
+  text, so write labels the way the methods are asked to write LaTeX. Spaces inside `\text{...}`
+  are dropped like any other spacing in an equation.
+* Edit distances and the character line-up are computed in pure Python; a board with thousands
+  of characters takes a few seconds.
 * The synthetic test set is printed text on a white background. It proves the script works; it
   says nothing about handwriting accuracy.

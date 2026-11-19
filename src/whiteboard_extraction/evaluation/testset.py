@@ -12,6 +12,14 @@ Each line of labels.jsonl describes one image::
   recognizer and used to order blocks.
 * blocks: what is written on the board, top to bottom, each with kind "prose" or "equation".
   An empty list is a valid label for a blank board.
+
+A block is one written line or expression, and it has one kind. A sentence that wraps across
+lines on the board is one prose block; each line of a derivation is its own equation block; a
+heading or a label is a block of its own; a line that contains mathematics is an equation even
+when a few words accompany it. Methods are expected to return blocks of the same size. WER and
+CER read the board as one text, so correctly read text costs nothing there however its lines
+of one kind were split or merged; that shows only in the block-level numbers (exact match and
+the kind scores).
 """
 
 from __future__ import annotations
@@ -23,9 +31,7 @@ from typing import Any
 
 import numpy as np
 
-from whiteboard_extraction.recognition.base import RecognizedBlock
-
-from .metrics import KINDS
+from whiteboard_extraction.recognition.base import KINDS, RecognizedBlock
 
 MANIFEST_NAME = "labels.jsonl"
 
@@ -56,7 +62,7 @@ class Sample:
 
 
 def load_test_set(directory: Path) -> list[Sample]:
-    """Read every sample listed in <directory>/labels.jsonl, checking that the images exist."""
+    """Read every sample listed in <directory>/labels.jsonl, checking that each image can be read."""
     directory = Path(directory)
     manifest = directory / MANIFEST_NAME
     if not manifest.is_file():
@@ -98,6 +104,10 @@ def _parse_record(record: Any, directory: Path, where: str) -> Sample:
     image_path = directory / image
     if not image_path.is_file():
         raise TestSetError(f"{where}: image {image_path} does not exist.")
+    import cv2  # imported here so the metrics can be used without OpenCV installed
+
+    if cv2.imread(str(image_path)) is None:
+        raise TestSetError(f"{where}: OpenCV cannot read {image_path}.")
     try:
         timestamp = float(record.get("timestamp", 0.0))
     except (TypeError, ValueError):
@@ -109,8 +119,8 @@ def _parse_record(record: Any, directory: Path, where: str) -> Sample:
     for index, raw in enumerate(raw_blocks, start=1):
         if not isinstance(raw, dict) or not isinstance(raw.get("text"), str) or not raw["text"].strip():
             raise TestSetError(f"{where}: block {index} needs a non-empty 'text'.")
-        kind = raw.get("kind", "prose")
+        kind = raw.get("kind")
         if kind not in KINDS:
-            raise TestSetError(f"{where}: block {index} has kind {kind!r}; use one of {', '.join(KINDS)}.")
+            raise TestSetError(f"{where}: block {index} needs a kind, one of {', '.join(KINDS)} (got {kind!r}).")
         blocks.append(RecognizedBlock(text=raw["text"], kind=kind, timestamp=timestamp))
     return Sample(name=image, image_path=image_path, timestamp=timestamp, blocks=tuple(blocks))

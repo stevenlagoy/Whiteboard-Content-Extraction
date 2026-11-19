@@ -29,6 +29,7 @@ try:
 except ImportError:  # running from a checkout without `pip install -e .`
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
+from whiteboard_extraction.evaluation.metrics import MIN_SIMILARITY  # noqa: E402
 from whiteboard_extraction.evaluation.report import load_results, render_report, save_results  # noqa: E402
 from whiteboard_extraction.evaluation.runner import BASELINES, MethodResult, evaluate_named  # noqa: E402
 from whiteboard_extraction.evaluation.synthetic import write_synthetic_test_set  # noqa: E402
@@ -52,6 +53,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--casefold", action="store_true", help="ignore letter case when comparing text")
     parser.add_argument(
+        "--min-similarity", type=float, default=MIN_SIMILARITY, metavar="X",
+        help="text similarity from 0 to 1 a predicted block needs to count as the same block as a labeled one "
+             f"(default: {MIN_SIMILARITY}); lower it for a method that reads handwriting poorly",
+    )
+    parser.add_argument(
+        "--no-warmup", action="store_true",
+        help="skip the untimed first call that keeps model loading out of the time per image "
+             "(use it for a method that is billed per call)",
+    )
+    parser.add_argument(
         "--write-sample", type=Path, metavar="DIR",
         help="write a small synthetic test set to DIR; it is scored when --test-set is omitted",
     )
@@ -63,9 +74,19 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _utf8_output() -> None:
+    """Print as UTF-8 whatever the console's code page is; a model may return any character."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
+
 def main(argv: list[str] | None = None) -> int:
+    _utf8_output()
     parser = build_parser()
     args = parser.parse_args(argv)
+    if not 0.0 <= args.min_similarity <= 1.0:
+        parser.error("--min-similarity must be between 0 and 1")
     test_set = _resolve_test_set(args, parser)
     results = _load_saved(args.load, parser)
     if test_set is not None:
@@ -113,7 +134,8 @@ def _score_methods(test_set: Path, args: argparse.Namespace, parser: argparse.Ar
     for name in args.method or DEFAULT_METHODS:
         print(f"Scoring {name} on {len(samples)} samples...", file=sys.stderr)
         results.append(evaluate_named(
-            name, samples, casefold=args.casefold, test_set=str(test_set),
+            name, samples, casefold=args.casefold, min_similarity=args.min_similarity, test_set=str(test_set),
+            warmup=not args.no_warmup,
             ocr_engine=args.ocr_engine, llm_model=args.llm_model, cnn_checkpoint=args.cnn_checkpoint,
         ))
     return results
