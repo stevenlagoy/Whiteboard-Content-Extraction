@@ -110,6 +110,9 @@ def run_pipeline(
     sample_paths: dict[float, Path] = {}
     board_detection_errors: list[dict] = []
 
+    # Store every individual TextBoxes detection for visualization.
+    text_boxes_by_timestamp = {}
+
     textboxes_net = None
     if detector == "textboxes":
         textboxes_net = load_textboxes()
@@ -142,6 +145,7 @@ def run_pipeline(
 
                 if not boxes:
                     raise ValueError("No text regions detected.")
+                text_boxes_by_timestamp[timestamp] = boxes
 
                 x1 = min(box[0] for box in boxes)
                 y1 = min(box[1] for box in boxes)
@@ -247,7 +251,43 @@ def run_pipeline(
         # Save an annotated full-frame visualization
         x, y, w, h = box
         annotated = frame.copy()
-        cv2.rectangle(annotated, (x, y), (x + w, y + h), (0, 255, 0), 3)
+
+        if detector == "textboxes":
+                # Draw individual TextBoxes detections in RED.
+            individual_boxes = text_boxes_by_timestamp.get(timestamp, [])
+
+            for detection_index, (dx, dy, dw, dh) in enumerate(individual_boxes):
+
+                cv2.rectangle(
+                    annotated,
+                    (dx, dy),
+                    (dx + dw, dy + dh),
+                    (0, 0, 255),
+                    2,
+                )
+
+                # Optional: label each detection.
+                cv2.putText(
+                    annotated,
+                    f"Text {detection_index + 1}",
+                    (dx, max(dy - 8, 15)),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5,
+                    (0, 0, 255),
+                    1,
+                    cv2.LINE_AA,
+                )
+
+            # Draw the combined bounding region in GREEN.
+            cv2.rectangle(
+                annotated,
+                (x, y),
+                (x + w, y + h),
+                (0, 255, 0),
+                3,
+            )
+        else:
+            cv2.rectangle(annotated, (x, y), (x + w, y + h), (0, 255, 0), 3)
         save_image(directories["board_detection"] / f"{name}.jpg", annotated)
         save_image(directories["board_crops"] / f"{name}.jpg", board)
         board_rows.append({
