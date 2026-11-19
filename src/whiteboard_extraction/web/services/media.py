@@ -61,5 +61,5 @@ class OpenCVMediaProbe:
         try:
             import cv2
         except ImportError as error:
-            raise MediaError("OpenCV is required to read video files (pip install opencv-python-headless).") from error
+            raise MediaError("OpenCV is required to read video files (pip install opencv-contrib-python-headless).") from error
         return cv2

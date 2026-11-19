@@ -5,3 +5,6 @@ sample_*.jpg
 raw/test_footage/*
 !raw/test_footage/*.mp4
 !raw/test_footage/sources.md
+raw/ICDAR/**
+raw/AccessMath/**
+models/textboxes/**

@@ -157,5 +157,18 @@ TextBoxes_icdar13.caffemodel
 VGGNet initialization weights:
 VGG_ILSVRC_16_layers_fc_reduced.caffemodel
 
-Model files are stored locally under:
-accessmath-textboxes/models/pretrained/
+The runtime detector uses OpenCV's Caffe DNN compatibility and does not require a Caffe build or a Linux-specific environment:
+
+```bash
+pip install opencv-contrib-python-headless
+python scripts/download_textboxes_assets.py
+python scripts/detect_textboxes.py --help
+```
+
+Inference assets are stored under `data/models/textboxes/` and are ignored by Git. VGG weights are only needed for retraining; add `--include-vgg` to download them.
+
+Download and verify the pinned ICDAR 2013 mirror with:
+
+```bash
+python scripts/download_icdar2013.py
+```

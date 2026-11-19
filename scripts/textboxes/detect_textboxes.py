@@ -51,8 +51,16 @@ def main():
 
     parser.add_argument("--frames", required=True)
     parser.add_argument("--manifest", required=True)
-    parser.add_argument("--prototxt", required=True)
-    parser.add_argument("--weights", required=True)
+    project_root = Path(__file__).resolve().parents[1]
+    model_dir = project_root / "data" / "models" / "textboxes"
+    parser.add_argument(
+        "--prototxt",
+        default=str(model_dir / "deploy.prototxt"),
+    )
+    parser.add_argument(
+        "--weights",
+        default=str(model_dir / "TextBoxes_icdar13.caffemodel"),
+    )
     parser.add_argument("--output", required=True)
 
     args = parser.parse_args()
