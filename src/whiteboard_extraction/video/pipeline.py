@@ -95,6 +95,8 @@ def run_pipeline(
         raise ValueError("Sampling interval must be greater than zero.")
     if threshold < 0 or quota < 0:
         raise ValueError("Threshold and quota must be nonnegative.")
+    if detector not in {"cv2", "textboxes"}:
+        raise ValueError("Detector must be either 'cv2' or 'textboxes'.")
 
     video_name = video_path.stem
     directories = make_stage_dirs(output_root, video_name)
@@ -235,7 +237,18 @@ def run_pipeline(
             print(f"\tCould not reload sampled frame: {sample_path}", file=sys.stderr)
             continue
         try:
-            box = detect_board_region(frame)
+            if detector == "cv2":
+                box = detect_board_region(frame)
+            else:
+                boxes = detect_textboxes(frame, textboxes_net)
+                text_boxes_by_timestamp[timestamp] = boxes
+                if not boxes:
+                    raise ValueError("No text regions detected.")
+                x1 = min(box[0] for box in boxes)
+                y1 = min(box[1] for box in boxes)
+                x2 = max(box[0] + box[2] for box in boxes)
+                y2 = max(box[1] + box[3] for box in boxes)
+                box = (x1, y1, x2 - x1, y2 - y1)
             board = crop_to_board(frame, box)
         except (ValueError, cv2.error) as error:
             print(f"\tBoard detection failed: {error}", file=sys.stderr)
@@ -430,7 +443,8 @@ def main() -> None:
         "--detector",
         type=str,
         default="cv2",
-        help="whether to use cv2 or textboxes as the text/equation detection system"
+        choices=("cv2", "textboxes"),
+        help="Board/text-region detector (default: cv2).",
     )
     args = parser.parse_args()
 

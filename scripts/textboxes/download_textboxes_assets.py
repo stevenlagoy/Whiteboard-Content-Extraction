@@ -5,7 +5,7 @@ import urllib.request
 from pathlib import Path
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT = PROJECT_ROOT / "data" / "models" / "textboxes"
 
 ICDAR_WEIGHTS_URL = (
